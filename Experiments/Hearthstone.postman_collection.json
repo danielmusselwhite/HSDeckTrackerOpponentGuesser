@@ -1,0 +1,42 @@
+{
+	"info": {
+		"_postman_id": "254c061b-3b6e-4ffb-b09f-a3d4e6399387",
+		"name": "Hearthstone",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28153040"
+	},
+	"item": [
+		{
+			"name": "Get Decks: Winrates, Card List, and ID",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Get Deck name using Archetype ID",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Get Card Info From DBF",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "GetDecksByWinrateOld",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
