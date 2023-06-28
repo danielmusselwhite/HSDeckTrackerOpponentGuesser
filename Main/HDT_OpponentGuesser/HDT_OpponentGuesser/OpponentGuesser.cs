@@ -21,15 +21,13 @@ namespace HDT_OpponentGuesser
         private static GameV2 _game;
         private static Player _opponent;
         private static string _class;
+        private static List<dynamic> _metaClassDecks;
 
         // Triggered when the game starts
         internal static async void GameStart()
         {
             // set the private variables
             _game = Hearthstone_Deck_Tracker.Core.Game;
-
-            Log.Info("Game started, opponent is " + _class);
-
         } 
 
         // Triggered when a turn starts
@@ -44,6 +42,30 @@ namespace HDT_OpponentGuesser
             {
                 _class = _opponent.Class;
                 Log.Info("Start of first turn: opponent class is " + _class);
+
+                // Do an API call to get a list of all meta decks
+                // based off of: $response = Invoke-RestMethod 'https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=BRONZE_THROUGH_GOLD&Region=ALL&TimeRange=CURRENT_PATCH' -Method 'GET' -Headers $headers
+
+                // Create the URL
+                string url = "https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=GOLD&Region=ALL&TimeRange=CURRENT_PATCH";
+                Log.Info("url: " + url);
+
+
+                // Create the HTTP client
+                HttpClient client = new HttpClient();
+
+                // Make the API call
+                HttpResponseMessage response = client.GetAsync(url).Result;
+
+                // Get the response content
+                HttpContent content = response.Content;
+
+                // Get the string content
+                string stringContent = content.ReadAsStringAsync().Result;
+                Log.Info("stringContent: " + stringContent);
+                content.Dispose();
+                client.Dispose();
+
             }
         }
 
@@ -52,6 +74,7 @@ namespace HDT_OpponentGuesser
         // Triggered when the opponent plays a card
         internal static void OpponentPlay(Card card)
         {
+            #region Getting the list of cards the opponent played that originated from their deck
             // Log some core info on the card that was just played
             Log.Info($"Opponent played {card.Name} ({card.Id}), {card.Cost}");
 
@@ -65,6 +88,7 @@ namespace HDT_OpponentGuesser
             List<Card> deckPlayedCards = allPlayedCards.Where(c => !c.IsCreated && card.Collectible).ToList(); // cards must be collectible (eg not a token) and have not been created
             string deckPlayedCardsString = string.Join(", ", deckPlayedCards.Select(c => c.Name));
             Log.Info($"Opponent has played {deckPlayedCards.Count()} cards from their deck in total ({deckPlayedCardsString})");
+            #endregion
         }
 
     }
