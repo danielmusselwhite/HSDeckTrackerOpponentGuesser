@@ -38,10 +38,10 @@ function Get-DeckStats{
     foreach($card in $playedCards){
         if($DeckListUnknownCards -contains $card){
             $DeckListUnknownCards = $DeckListUnknownCards | Select-Object -Skip 1
-            # Write-Host "$card is in the deck" -ForegroundColor Green
+            Write-Host "$($cardHashTable[$card][0]) ($card) is in the deck" -ForegroundColor Green
         }
         else{
-            # Write-Host "$card is not in the deck" -ForegroundColor Red
+            Write-Host "$($cardHashTable[$card][0]) ($card) is not in the deck" -ForegroundColor Yellow
         }
     }
     $DeckPercentageMatch = ($DeckSize - $DeckListUnknownCards.count) / $DeckSize
@@ -109,7 +109,7 @@ function Insert-CardPair{
 
             # if the card pair to be inserted has a lower cost than the current card pair, insert it before the current card pair
             if($CardPairCost -lt $cardCost){
-                # Write-Host "$cardPair has a lower cost than $card so inserting before it" -ForegroundColor White -BackgroundColor Red
+                # Write-Host "$cardPair has a lower cost than $card so inserting before it" -ForegroundColor White -BackgroundColor Yellow
                 break
             }
 
@@ -117,7 +117,7 @@ function Insert-CardPair{
             elseif($CardPairCost -eq $cardCost){
                 # if the card pair to be inserted has a name that comes before the current card pair, insert it before the current card pair
                 if($CardPair[0] -lt $card[0]){
-                    # Write-Host "$cardPair has the same cost as $card so inserting alphabetically before it" -ForegroundColor White -BackgroundColor Red
+                    # Write-Host "$cardPair has the same cost as $card so inserting alphabetically before it" -ForegroundColor White -BackgroundColor Yellow
                     break
                 }
             }
@@ -158,7 +158,6 @@ function RunMain{
     # list of card DBF's for the cards so far in the format [[cardID, number of copies], [cardID, number of copies], ...]
     $playedCards = @(@(74755,1),@(72007,1),@(79556,1),@(78273,2),@(72896,1),@(78264,2)) # just random cards I know exist in a meta deck for me to check
 
-
     # Make API Request to get all meta decks for the chosen class
     $response = Invoke-RestMethod 'https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=BRONZE_THROUGH_GOLD&Region=ALL&TimeRange=CURRENT_PATCH' -Method 'GET' -Headers $headers
     $decksForClass = $response.series.data.$class #will already be sorted in order of winrate
@@ -172,6 +171,7 @@ function RunMain{
 
     # default best deck is the first deck in the list
     $bestDeck = $decksForClass[0]
+    Write-Host "`nChecking deck: $($bestDeck.deck_id)" -ForegroundColor Magenta
     $bestDeckStats = Get-DeckStats -PlayedCards $playedCards -Deck $bestDeck
     $bestDeckPercentage = $bestDeckStats[0]
     $bestDeckWinRate = $bestDeckStats[1]
@@ -179,7 +179,7 @@ function RunMain{
 
     # for each deck in $decksForClass (besides the first element which is already set as the best deck by default)
     foreach($deck in $decksForClass[1..$decksForClass.count]){
-        Write-Host "Checking deck: $($deck.deck_id)" -ForegroundColor Magenta
+        Write-Host "`nChecking deck: $($deck.deck_id)" -ForegroundColor Magenta
 
 
         # get the stats for the current deck
@@ -215,10 +215,10 @@ function RunMain{
     # print the best deck and its stats to check it is as expected
     $bestDeck
     $bestDeckTruePercentage = [math]::Round($bestDeckPercentage * 100, 2)
-    Write-Host "Percentage of cards in common with played cards: $bestDeckTruePercentage" -ForegroundColor Yellow
-    Write-Host "Winrate: $bestDeckWinRate" -ForegroundColor Yellow
-    Write-Host "Best Deck ID: $($bestDeck.deck_id)" -ForegroundColor Yellow
-    Write-Host "Best Deck Archetype Name: $bestDeckArchetypeName" -ForegroundColor Yellow
+    Write-Host "Percentage of cards in common with played cards: $bestDeckTruePercentage%" -ForegroundColor Cyan
+    Write-Host "Winrate: $bestDeckWinRate" -ForegroundColor Cyan
+    Write-Host "Best Guess Deck ID: $($bestDeck.deck_id)" -ForegroundColor Cyan
+    Write-Host "Best Guess Deck Archetype Name: $bestDeckArchetypeName" -ForegroundColor Cyan
     #endregion
 
 
@@ -248,14 +248,14 @@ function RunMain{
     $bestDeckCardsInfo.RemoveAt(0)
 
     # print the card names in the best deck
-    Write-Host "Best Deck Cards Info:" -ForegroundColor Cyan
+    Write-Host "Best Guess Deck Cards Info:" -ForegroundColor Cyan
     
     for($i = 0; $i -lt $bestDeckCardsInfo.Count; $i++){
         $cardPair = $bestDeckCardsInfo[$i]
         $cardName = $cardPair[0]
         $cardCost = $cardPair[1]
 
-        Write-Host "Card $($i+1)`n$cardName, Cost: $cardCost`n" -ForegroundColor Cyan
+        Write-Host "Card $($i+1)`n$cardName, Cost: $cardCost`n" -ForegroundColor Blue
     }
 
     #endregion
