@@ -159,7 +159,7 @@ function RunMain{
     $playedCards = @(@(74755,1),@(72007,1),@(79556,1),@(78273,2),@(72896,1),@(78264,2)) # just random cards I know exist in a meta deck for me to check
 
     # Make API Request to get all meta decks for the chosen class
-    $response = Invoke-RestMethod 'https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=BRONZE_THROUGH_GOLD&Region=ALL&TimeRange=CURRENT_PATCH' -Method 'GET' -Headers $headers
+    $response = Invoke-RestMethod 'https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=GOLD&Region=ALL&TimeRange=CURRENT_PATCH' -Method 'GET' -Headers $headers
     $decksForClass = $response.series.data.$class #will already be sorted in order of winrate
 
 
