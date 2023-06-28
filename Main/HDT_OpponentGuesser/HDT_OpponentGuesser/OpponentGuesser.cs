@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 // Adding the hearthstone deck tracker references required for creating the plugin
@@ -65,6 +66,27 @@ namespace HDT_OpponentGuesser
                 Log.Info("stringContent: " + stringContent);
                 content.Dispose();
                 client.Dispose();
+
+                #region Getting the list of meta decks for this class
+                // Parse the JSON
+                var json = JsonSerializer.Deserialize<dynamic>(stringContent);
+                Log.Info("json: " + json);
+
+                // Get all decks from the json
+                var decks = json["series"]["data"];
+                Log.Info("decks: " + decks);
+
+                // Filter the decks by those with class field matching _class
+                foreach (var deck in decks)
+                {
+                    if (deck["class"] == _class)
+                    {
+                        _metaClassDecks.Add(deck);
+                        Log.Info("Added deck to _metaClassDecks: " + deck);
+                    }
+                }
+
+                #endregion
 
             }
         }
@@ -129,7 +151,7 @@ namespace HDT_OpponentGuesser
 
         public string Author => "Dmuss";
 
-        public Version Version => new Version(0, 0, 2);
+        public Version Version => new Version(0, 0, 4);
 
         public MenuItem MenuItem => null;
     }
