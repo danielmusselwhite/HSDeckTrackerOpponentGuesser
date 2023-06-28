@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,19 +14,40 @@ using Hearthstone_Deck_Tracker.Hearthstone;
 using Hearthstone_Deck_Tracker.Plugins;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 
-
 namespace HDT_OpponentGuesser
 {
     public class OpponentGuesser
     {
         private static GameV2 _game;
+        private static Player _opponent;
+        private static string _class;
 
         // Triggered when the game starts
-        internal static void GameStart()
+        internal static async void GameStart()
         {
-            // set _game to  Hearthstone_Deck_Tracker.Core.Game;
+            // set the private variables
             _game = Hearthstone_Deck_Tracker.Core.Game;
+
+            Log.Info("Game started, opponent is " + _class);
+
+        } 
+
+        // Triggered when a turn starts
+        internal static void TurnStart(ActivePlayer player)
+        {
+            // if the private variables are not yet set, set them
+            if (_opponent == null)
+            {
+                _opponent = _game.Opponent;
+            }
+            if (_class == null)
+            {
+                _class = _opponent.Class;
+                Log.Info("Start of first turn: opponent class is " + _class);
+            }
         }
+
+
 
         // Triggered when the opponent plays a card
         internal static void OpponentPlay(Card card)
@@ -33,17 +56,15 @@ namespace HDT_OpponentGuesser
             Log.Info($"Opponent played {card.Name} ({card.Id}), {card.Cost}");
 
             // Get the List of all cards played
-            List<Card> allPlayedCards = _game.Opponent.OpponentCardList;
+            List<Card> allPlayedCards = _opponent.OpponentCardList;
             allPlayedCards.Add(card);
             string allPlayedCardsString = string.Join(", ", allPlayedCards.Select(c => c.Name));
             Log.Info($"Opponent has played {allPlayedCards.Count()} cards in total ({allPlayedCardsString})");
             
-
             // Filter by cards that originated from their deck
             List<Card> deckPlayedCards = allPlayedCards.Where(c => !c.IsCreated && card.Collectible).ToList(); // cards must be collectible (eg not a token) and have not been created
             string deckPlayedCardsString = string.Join(", ", deckPlayedCards.Select(c => c.Name));
             Log.Info($"Opponent has played {deckPlayedCards.Count()} cards from their deck in total ({deckPlayedCardsString})");
-
         }
 
     }
@@ -57,6 +78,7 @@ namespace HDT_OpponentGuesser
             // Registering the plugin to the game events
             GameEvents.OnGameStart.Add(OpponentGuesser.GameStart);
             GameEvents.OnOpponentPlay.Add(OpponentGuesser.OpponentPlay);
+            GameEvents.OnTurnStart.Add(OpponentGuesser.TurnStart);
         }
 
         public void OnUnload()
