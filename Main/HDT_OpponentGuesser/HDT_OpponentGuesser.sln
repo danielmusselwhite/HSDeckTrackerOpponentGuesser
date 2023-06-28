@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HDT_OpponentGuesser", "HDT_OpponentGuesser\HDT_OpponentGuesser.csproj", "{561E9938-6224-41E6-9057-5F2EEF76CAFD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{561E9938-6224-41E6-9057-5F2EEF76CAFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{561E9938-6224-41E6-9057-5F2EEF76CAFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{561E9938-6224-41E6-9057-5F2EEF76CAFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{561E9938-6224-41E6-9057-5F2EEF76CAFD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F6EA8810-290D-4121-9FA6-3C43E5D670E3}
+	EndGlobalSection
+EndGlobal
