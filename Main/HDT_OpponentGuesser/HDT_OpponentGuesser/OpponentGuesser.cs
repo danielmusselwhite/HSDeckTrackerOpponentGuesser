@@ -17,23 +17,61 @@ using Hearthstone_Deck_Tracker.Hearthstone;
 using Hearthstone_Deck_Tracker.Plugins;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 using Newtonsoft.Json.Linq;
-
+using Hearthstone_Deck_Tracker;
 
 namespace HDT_OpponentGuesser
 {
     public class OpponentGuesser
     {
-        private static GameV2 _game;
-        private static Player _opponent;
-        private static string _class;
-        private static JToken _metaClassDecks;
-        private static double _minimumMatch = 10; // minimum % of cards that must match for a deck to be considered a possible match
-        private static bool _firstTurn;
-        // hashTable in format Key: dbfId (int), Value: name (string)
-        private static Dictionary<int, string> _dbfIdToName = new Dictionary<int, string>() { };
+        private GameV2 _game;
+        private Player _opponent;
+        private string _class;
+        private JToken _metaClassDecks;
+        private bool _firstTurn;
+        private Dictionary<int, string> _dbfIdToName = new Dictionary<int, string>() { }; // hash table of card dbfId to card name for efficient lookup
+        private BestFitDeckDisplay _bfdDisplay; // reference to the BestFitDeckDisplay class to display this information on the screen to the user
+        private string _allMetaDecks; // string containing all meta decks from the API call
+
+        //TODO - possibly make this an option for user to set in the GUI
+        private double _minimumMatch = 50; // minimum % of cards that must match for a deck to be considered a possible match
+
+        // Creating constructor that takes in a reference to the BestFitDeckDisplay class
+        public OpponentGuesser(BestFitDeckDisplay displayBestFitDeck)
+        {
+            _game = Hearthstone_Deck_Tracker.Core.Game;
+
+            GetCardHashTable();
+
+            _bfdDisplay = displayBestFitDeck;
+            if (Config.Instance.HideInMenu && _game.IsInMenu)
+            {
+                _bfdDisplay.Hide();
+            }
+
+            #region Do an API call to get a list of all meta decks
+            // Create the URL
+            string url = "https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=GOLD&Region=ALL&TimeRange=CURRENT_PATCH";
+
+
+            // Create the HTTP client
+            HttpClient client = new HttpClient();
+
+            // Make the API call
+            HttpResponseMessage response = client.GetAsync(url).Result;
+
+            // Get the response content
+            HttpContent content = response.Content;
+
+            // Get the string content
+            _allMetaDecks = content.ReadAsStringAsync().Result;
+            content.Dispose();
+            client.Dispose();
+            #endregion
+        }
+
 
         // Creating hashtable of all cards in game for efficient lookup
-        private static void GetCardHashTable()
+        private void GetCardHashTable()
         {
             // Making API call to get info on all cards via api
             var httpClient = new HttpClient();
@@ -54,21 +92,23 @@ namespace HDT_OpponentGuesser
         }
 
 
-        // Triggered when the game starts
-        internal static void GameStart()
+        // Triggered when a new game starts
+        internal void GameStart()
         {
             // set the private variables
-            _game = Hearthstone_Deck_Tracker.Core.Game;
             _opponent = null; // reset the opponent for this new game
             _class = null; // reset the class for this new game
             _firstTurn = true; // reset the first turn for this new game
             _metaClassDecks = null;
-            GetCardHashTable();
+            _bfdDisplay.Update(null); // update the display to show the default text
+            _bfdDisplay.Show(); // show the display
         } 
 
         // Triggered when a turn starts
-        internal static void TurnStart(ActivePlayer player)
+        internal void TurnStart(ActivePlayer player)
         {
+            // Couldn't be done in GameStart, as the opponent's class is not known until the first turn
+
             // setting up params on the first turn of the game once opponent has loaded in
             if (_firstTurn) 
             { 
@@ -78,28 +118,9 @@ namespace HDT_OpponentGuesser
 
                 Log.Info("Start of first turn: opponent class is " + _class);
 
-                #region Do an API call to get a list of all meta decks
-                // Create the URL
-                string url = "https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=GOLD&Region=ALL&TimeRange=CURRENT_PATCH";
-
-
-                // Create the HTTP client
-                HttpClient client = new HttpClient();
-
-                // Make the API call
-                HttpResponseMessage response = client.GetAsync(url).Result;
-
-                // Get the response content
-                HttpContent content = response.Content;
-
-                // Get the string content
-                string stringContent = content.ReadAsStringAsync().Result;
-                content.Dispose();
-                client.Dispose();
-                #endregion
-
-                #region Getting the list of meta decks for this class
+                #region Parsing the _allMetaDecks JSON String to get the list of meta decks for this class
                 // Convert the string content to a JSON object
+                string stringContent = _allMetaDecks;
                 dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
 
                 // Get the jsonContent.series.data and store it to "allDecks"
@@ -150,7 +171,7 @@ namespace HDT_OpponentGuesser
 
 
         // Triggered when the opponent plays a card
-        internal static void OpponentPlay(Card card)
+        internal void OpponentPlay(Card card)
         {
             #region Getting the list of cards the opponent played that originated from their deck
             // Log some core info on the card that was just played
@@ -271,52 +292,30 @@ namespace HDT_OpponentGuesser
 
                 }
 
+                // Display the deck name in the overlay
+                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent);
             }
             else
+            {
                 Log.Info("No deck has a match greater than the minimum of " + _minimumMatch + "%");
+
+                // Display that there is no matching deck in the overlay
+                _bfdDisplay.Update(null);
+            }
             #endregion
         }
 
+        
+        // Triggered when the player enters menu
+        internal void InMenu()
+        {
+            // Hide the overlay
+            if (Config.Instance.HideInMenu)
+            {
+                _bfdDisplay.Hide();
+            }
+        }
+    
     }
 
-    public class OpponentGuesserPlugin: IPlugin
-    {
-        public void OnLoad()
-        {
-            // Triggered upon startup and when the user ticks the plugin on
-
-            // Registering the plugin to the game events
-            GameEvents.OnGameStart.Add(OpponentGuesser.GameStart);
-            GameEvents.OnOpponentPlay.Add(OpponentGuesser.OpponentPlay);
-            GameEvents.OnTurnStart.Add(OpponentGuesser.TurnStart);
-        }
-
-        public void OnUnload()
-        {
-            // Triggered when the user unticks the plugin, however, HDT does not completely unload the plugin.
-            // see https://git.io/vxEcH
-        }
-
-        public void OnButtonPress()
-        {
-            // Triggered when the user clicks your button in the plugin list
-        }
-
-        public void OnUpdate()
-        {
-            // called every ~100ms
-        }
-
-        public string Name => "PLUGIN NAME";
-
-        public string Description => "DESCRIPTION";
-
-        public string ButtonText => "BUTTON TEXT";
-
-        public string Author => "Dmuss";
-
-        public Version Version => new Version(0, 0, 12);
-
-        public MenuItem MenuItem => null;
-    }
 }
