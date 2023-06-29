@@ -211,7 +211,48 @@ namespace HDT_OpponentGuesser
                 Log.Info("Deck " + i + "("+ _metaClassDecks[i]["deck_id"] + ")"+" has a " + matchPercent + "% match with the cards played, and a " + winRate + "% winrate");
             }
             if(bestFitDeckIndex != -1)
-                Log.Info("Best fit deck is (" + bestFitDeckIndex +") "+ _metaClassDecks[bestFitDeckIndex]["deck_id"] + " with a " + bestFitDeckMatchPercent + "% match (greater than minimum of "+_minimumMatch+"%) and a " + bestWinRate + "% winrate");
+            {
+                JToken bestFitDeck = _metaClassDecks[bestFitDeckIndex];
+                string archetypeId = bestFitDeck["archetype_id"].ToString();
+
+                // API call toget name of deck with this archetype_id
+
+                #region Getting the name of the Deck
+                #region Do an API call to get info on this decks archetype
+                // Create the URL
+                string url = $"https://hsreplay.net/api/v1/archetypes/{archetypeId}";
+                Log.Info("url: " + url);
+
+                // Create the HTTP client
+                HttpClient client = new HttpClient();
+
+                // Make the API call
+                HttpResponseMessage response = client.GetAsync(url).Result;
+
+                // Get the response content
+                HttpContent content = response.Content;
+
+                // Get the string content
+                string stringContent = content.ReadAsStringAsync().Result;
+                Log.Info("stringContent: " + stringContent);
+                content.Dispose();
+                client.Dispose();
+                #endregion
+
+                #region Getting the archetype name from this info
+                // Convert the string content to a JSON object
+                dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
+                //Log.Info("jsonContent: " + jsonContent);
+                Log.Info("jsonContent type: " + jsonContent.GetType());
+
+                // Get the name from this JSON object
+                string bestDeckName = jsonContent["name"];
+                #endregion
+                #endregion
+
+                Log.Info("Best fit deck is archetype "+bestDeckName+" at index " + bestFitDeckIndex +  " (" + _metaClassDecks[bestFitDeckIndex]["deck_id"] + ") with a " + bestFitDeckMatchPercent + "% match (greater than minimum of " + _minimumMatch + "%) and a " + bestWinRate + "% winrate");
+
+            }
             else
                 Log.Info("No deck has a match greater than the minimum of " + _minimumMatch + "%");
             #endregion
@@ -255,7 +296,7 @@ namespace HDT_OpponentGuesser
 
         public string Author => "Dmuss";
 
-        public Version Version => new Version(0, 0, 9);
+        public Version Version => new Version(0, 0, 10);
 
         public MenuItem MenuItem => null;
     }
