@@ -87,14 +87,34 @@ namespace HDT_OpponentGuesser
                 // Get the Decks for this class only
                 _metaClassDecks = allDecks[_class];
                 Log.Info("Meta Decks for this class: " + _metaClassDecks);
-                
-                // Testing indexing the meta decks
-                Log.Info("Meta Deck 1: " + _metaClassDecks[0]);
-                Log.Info("Meta Deck 1 info: Deck ID = " + _metaClassDecks[0]["deck_id"] + "Win Rate = " + _metaClassDecks[0]["win_rate"]);
 
 
+                #region Transform deck_list into a 1D array
+                // _metaClassDecks[i][deck_list] is in the format "[[cardID, numberInDeck],[cardID, numberInDeck] ...]"
 
+                // for each deck in _metaClassDecks
+                for (int i = 0; i < _metaClassDecks.Count(); i++)
+                {
+                    Log.Info("Getting the deck_list for deck " + i + " ...");
+                    // first convert the string to a matrix
+                    List<List<int>> deckCardsMatrix = JsonConvert.DeserializeObject<List<List<int>>>(_metaClassDecks[i]["deck_list"].ToString());
 
+                    // then convert the matrix to a 1D list, by adding deckCardsMatrix[i][0] to the list deckCards deckCardsMatrix[i][1] times
+                    List<int> deckCards = new List<int>();
+                    for (int j = 0; j < deckCardsMatrix.Count(); j++)
+                    {
+                        for (int k = 0; k < deckCardsMatrix[j][1]; k++)
+                        {
+                            Log.Info("Adding " + deckCardsMatrix[j][0] + " to the deck ...");
+                            deckCards.Add(deckCardsMatrix[j][0]);
+                        }
+                    }
+
+                    // then replace the deck_list's value with the 1D list
+                    _metaClassDecks[i]["deck_list"] = deckCards.ToString();
+                }
+
+                #endregion
 
                 #endregion
 
@@ -108,7 +128,7 @@ namespace HDT_OpponentGuesser
         {
             #region Getting the list of cards the opponent played that originated from their deck
             // Log some core info on the card that was just played
-            Log.Info($"Opponent played {card.Name} ({card.Id}), {card.Cost}");
+            Log.Info($"Opponent played {card.Name} ({card.Id}), {card.Cost}, {card.DbfId}");
 
             // Get the List of all cards played
             List<Card> allPlayedCards = _opponent.OpponentCardList;
@@ -120,6 +140,53 @@ namespace HDT_OpponentGuesser
             List<Card> deckPlayedCards = allPlayedCards.Where(c => !c.IsCreated && card.Collectible).ToList(); // cards must be collectible (eg not a token) and have not been created
             string deckPlayedCardsString = string.Join(", ", deckPlayedCards.Select(c => c.Name));
             Log.Info($"Opponent has played {deckPlayedCards.Count()} cards from their deck in total ({deckPlayedCardsString})");
+            #endregion
+
+
+
+
+            #region Determining the best fit meta deck
+            // creating list of deckPlayedCards dbfId fields
+            List<int> deckPlayedCardsDbfId = new List<int>();
+            foreach (Card cardPlayed in deckPlayedCards)
+            {
+                deckPlayedCardsDbfId.Add(cardPlayed.DbfId);
+            }
+
+
+
+            // Loop through _metaClassDecks and find which has the most cards in common with deckPlayedCards
+            int bestFitDeckIndex = -1;
+            int bestFitDeckCardCount = -1;
+            for(int i=0; i<_metaClassDecks.Count(); i++)
+            {
+                // Get the current meta deck
+                JToken currentMetaDeck = _metaClassDecks[i];
+
+                // Get the current meta deck's cards
+                JToken currentMetaDeckCards = currentMetaDeck["cards"];
+
+                // Get the current meta deck's card count
+                int currentMetaDeckCardCount = currentMetaDeckCards.Count();
+
+                // Get the current meta deck's card names
+                List<string> currentMetaDeckCardNames = new List<string>();
+                foreach (JToken cardName in currentMetaDeckCards)
+                {
+                    currentMetaDeckCardNames.Add(cardName.ToString());
+                }
+
+                // Get the number of cards in deckPlayedCards that are also in currentMetaDeckCardNames
+                int currentMetaDeckCardCountInDeckPlayedCards = deckPlayedCards.Where(c => currentMetaDeckCardNames.Contains(c.Name)).Count();
+
+                // If this is the best fit deck so far, update the best fit deck index and card count
+                if (currentMetaDeckCardCountInDeckPlayedCards > bestFitDeckCardCount)
+                {
+                    bestFitDeckIndex = i;
+                    bestFitDeckCardCount = currentMetaDeckCardCountInDeckPlayedCards;
+                }
+            }
+
             #endregion
         }
 
