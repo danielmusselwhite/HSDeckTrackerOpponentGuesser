@@ -26,24 +26,27 @@ namespace HDT_OpponentGuesser
         private static Player _opponent;
         private static string _class;
         private static JToken _metaClassDecks;
+        private static double _minimumMatch = 10; // minimum % of cards that must match for a deck to be considered a possible match
+        private static bool _firstTurn;
 
         // Triggered when the game starts
-        internal static async void GameStart()
+        internal static void GameStart()
         {
             // set the private variables
             _game = Hearthstone_Deck_Tracker.Core.Game;
+            _opponent = null; // reset the opponent for this new game
+            _class = null; // reset the class for this new game
+            _firstTurn = true; // reset the first turn for this new game
+            _metaClassDecks = null;
         } 
 
         // Triggered when a turn starts
         internal static void TurnStart(ActivePlayer player)
         {
-            // if the private variables are not yet set, set them
-            if (_opponent == null)
-            {
+            // setting up params on the first turn of the game once opponent has loaded in
+            if (_firstTurn) 
+            { 
                 _opponent = _game.Opponent;
-            }
-            if (_class == null)
-            {
                 _class = _opponent.Class;
                 _class = _class.ToUpper();
                 Log.Info("Start of first turn: opponent class is " + _class);
@@ -91,6 +94,7 @@ namespace HDT_OpponentGuesser
 
                 #region Transform deck_list into a 1D array
                 // _metaClassDecks[i][deck_list] is in the format "[[cardID, numberInDeck],[cardID, numberInDeck] ...]"
+                // we want it in format [cardID, cardID, cardID, ...]
 
                 // for each deck in _metaClassDecks
                 for (int i = 0; i < _metaClassDecks.Count(); i++)
@@ -111,13 +115,16 @@ namespace HDT_OpponentGuesser
                     }
 
                     // then replace the deck_list's value with the 1D list
-                    _metaClassDecks[i]["deck_list"] = deckCards.ToString();
+                    _metaClassDecks[i]["deck_list"] = "["+string.Join(",", deckCards)+"]";
+
+
                 }
 
                 #endregion
 
-                #endregion
+                _firstTurn=false;
 
+                #endregion
             }
         }
 
@@ -145,48 +152,68 @@ namespace HDT_OpponentGuesser
 
 
 
-            #region Determining the best fit meta deck
+            #region Determining the best fit meta deck (by comparing % of played cards that are in each deck)
             // creating list of deckPlayedCards dbfId fields
             List<int> deckPlayedCardsDbfId = new List<int>();
             foreach (Card cardPlayed in deckPlayedCards)
             {
                 deckPlayedCardsDbfId.Add(cardPlayed.DbfId);
             }
-
-
+            Log.Info("deckPlayedCardsDbfId: " + deckPlayedCardsDbfId);
 
             // Loop through _metaClassDecks and find which has the most cards in common with deckPlayedCards
             int bestFitDeckIndex = -1;
-            int bestFitDeckCardCount = -1;
+            double bestFitDeckMatchPercent = _minimumMatch; // we are checking for strict improvement, so this value means we only consider guessing decks that match more than this percentage
+            double bestWinRate = -1;
+            Log.Info("Looping through _metaClassDecks ...");
             for(int i=0; i<_metaClassDecks.Count(); i++)
             {
-                // Get the current meta deck
-                JToken currentMetaDeck = _metaClassDecks[i];
+                Log.Info("Meta Deck " + i + ": " + _metaClassDecks[i]);
+                List<int> deckList = JsonConvert.DeserializeObject<List<int>>(_metaClassDecks[i]["deck_list"].ToString());
+                int matchCount = 0;
+                Log.Info("Decklist is: " + string.Join(", ",deckList));
 
-                // Get the current meta deck's cards
-                JToken currentMetaDeckCards = currentMetaDeck["cards"];
-
-                // Get the current meta deck's card count
-                int currentMetaDeckCardCount = currentMetaDeckCards.Count();
-
-                // Get the current meta deck's card names
-                List<string> currentMetaDeckCardNames = new List<string>();
-                foreach (JToken cardName in currentMetaDeckCards)
+                // Loop through the deckPlayedCardsDbfId
+                foreach (int cardDbfId in deckPlayedCardsDbfId)
                 {
-                    currentMetaDeckCardNames.Add(cardName.ToString());
+                    Log.Info("Checking if " + cardDbfId + " is in the decklist ...");
+                    // If this card is in the deckList, increment the matchCount and pop only the first instance of it from the deckList so it can't be matched again
+                    if (deckList.Contains(cardDbfId))
+                    {
+                        Log.Info("Match found!");
+                        matchCount++;
+                        deckList.Remove(cardDbfId);
+                    }
                 }
 
-                // Get the number of cards in deckPlayedCards that are also in currentMetaDeckCardNames
-                int currentMetaDeckCardCountInDeckPlayedCards = deckPlayedCards.Where(c => currentMetaDeckCardNames.Contains(c.Name)).Count();
+                // Calculate the match percentage and winrate
+                double matchPercent = (double)matchCount / (double)deckPlayedCardsDbfId.Count() * 100;
+                double winRate = (double)_metaClassDecks[i]["win_rate"];
+                Log.Info("Match count: " + matchCount + ", Cards played from deck: " + deckPlayedCardsDbfId.Count()+ " ("+matchPercent+") winrate");
 
-                // If this is the best fit deck so far, update the best fit deck index and card count
-                if (currentMetaDeckCardCountInDeckPlayedCards > bestFitDeckCardCount)
+                // If this deck has a higher match percentage than the previous best fit, replace it
+                if (matchPercent > bestFitDeckMatchPercent)
                 {
                     bestFitDeckIndex = i;
-                    bestFitDeckCardCount = currentMetaDeckCardCountInDeckPlayedCards;
+                    bestFitDeckMatchPercent = matchPercent;
+                    bestWinRate = winRate;
                 }
+                // If this deck has an equal match percentage, then pick the one with the highest winrate
+                else if (matchPercent == bestFitDeckMatchPercent)
+                {
+                    if (winRate > bestWinRate)
+                    {
+                        bestFitDeckIndex = i;
+                        bestFitDeckMatchPercent = matchPercent;
+                        bestWinRate = winRate;
+                    }
+                }
+                Log.Info("Deck " + i + "("+ _metaClassDecks[i]["deck_id"] + ")"+" has a " + matchPercent + "% match with the cards played, and a " + winRate + "% winrate");
             }
-
+            if(bestFitDeckIndex != -1)
+                Log.Info("Best fit deck is (" + bestFitDeckIndex +") "+ _metaClassDecks[bestFitDeckIndex]["deck_id"] + " with a " + bestFitDeckMatchPercent + "% match (greater than minimum of "+_minimumMatch+"%) and a " + bestWinRate + "% winrate");
+            else
+                Log.Info("No deck has a match greater than the minimum of " + _minimumMatch + "%");
             #endregion
         }
 
@@ -228,7 +255,7 @@ namespace HDT_OpponentGuesser
 
         public string Author => "Dmuss";
 
-        public Version Version => new Version(0, 0, 5);
+        public Version Version => new Version(0, 0, 9);
 
         public MenuItem MenuItem => null;
     }
