@@ -22,6 +22,7 @@ namespace HDT_OpponentGuesser
     {
         private string _deckId = "";
         private double _minimumMatch;
+        private DateTime _timeAFterClick = DateTime.Now;
 
         public BestFitDeckDisplay()
         {
@@ -92,12 +93,13 @@ namespace HDT_OpponentGuesser
                     {
                         this.viewDeckBlock.Background = Brushes.LightGoldenrodYellow;
 
-                        //detect if Mouse has been clicked
-                        new User32.MouseInput().LmbDown += ViewButtonClicked;
+                        //detect if Mouse has already been clicked
+                        if (DateTime.Now > _timeAFterClick)
+                        {
+                            _timeAFterClick = DateTime.Now.AddSeconds(3);
+                            new User32.MouseInput().LmbDown += ViewButtonClicked;
+                        }
 
-                        // TODO - find a way to show the deck
-                        // Either see how they're doing it in decktracker already to replicate
-                        // Or can simply do something eg make a new class called "DeckView" and "CardView" then create a CardView for each Card in the deck inside DeckView and show/hide that based on this
                     }
                     else
                     {
@@ -109,8 +111,14 @@ namespace HDT_OpponentGuesser
 
         private void ViewButtonClicked(object sender, EventArgs eventArgs)
         {
-            Log.Debug($"Attempting to load: https://hsreplay.net/decks/{_deckId}/#rankRange=GOLD&gameType=RANKED_STANDARD");
-            System.Diagnostics.Process.Start($"https://hsreplay.net/decks/{_deckId}/#rankRange=GOLD&gameType=RANKED_STANDARD");
+            string url = $"https://hsreplay.net/decks/{_deckId}/#rankRange=GOLD&gameType=RANKED_STANDARD";
+            Log.Debug(url);
+            System.Diagnostics.Process.Start(url);
+
+
+            // TODO - find a way to show the deck
+            // Either see how they're doing it in decktracker already to replicate
+            // Or can simply do something eg make a new class called "DeckView" and "CardView" then create a CardView for each Card in the deck inside DeckView and show/hide that based on this
         }
     }
 }

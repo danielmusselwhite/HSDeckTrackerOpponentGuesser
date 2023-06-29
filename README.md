@@ -12,12 +12,16 @@
 ## TODO's - Core
 
 - FEATURE: Make the predicted deck list appear on hover over the "view" button 
-- BUG: When "view" button is clicked - it sometimes loads more than 1 tab, find out why
 - BUG: Gives Null reference errors if HDT is Started AFTER a game is already in progress (low priority fix as not common for this to be done outside of dev)
+- BUG: After opponent played a card with *repeats* it will make their playedCardsList go NaN/Null; thus resulting in it incorrectly saying "No Deck above an xxx% match" even though there is a match. This resolves itself after a normal card is played.
+    - Example: Barrel of Monkeys and Bunch of Bananas
+        - Need to find a way of determining if a card is a repeat of this type or not
 
 ## TODO's - Maybes
 
 - Feature: Given we are detecting opponent's deck, may be interesting to collate the data to get in-depth W/L vs Deck Archetype not just vs Class
+    - E.g. instead of showing that decks WR (grabbed from hsreplay) in the GUI
+    - Show: 1. Your WinRate vs Decks of that archetype and 2. The WinRate of that archetype vs your deck
 - Feature: Could likely adapt what I use to find best fit of opponents deck, to  find the best fit of users deck to then display the mulligan guide for them on turn 1?
 - Feature: Have it detect game mode and send API requests for that mode (e.g. Standard vs Wild) - honestly okay with it just doing ranked_standard for now though as its most popular
 
