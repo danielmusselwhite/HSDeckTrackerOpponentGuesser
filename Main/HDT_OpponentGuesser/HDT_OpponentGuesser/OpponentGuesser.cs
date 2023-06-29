@@ -18,6 +18,7 @@ using Hearthstone_Deck_Tracker.Plugins;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 using Newtonsoft.Json.Linq;
 
+
 namespace HDT_OpponentGuesser
 {
     public class OpponentGuesser
@@ -28,6 +29,30 @@ namespace HDT_OpponentGuesser
         private static JToken _metaClassDecks;
         private static double _minimumMatch = 10; // minimum % of cards that must match for a deck to be considered a possible match
         private static bool _firstTurn;
+        // hashTable in format Key: dbfId (int), Value: name (string)
+        private static Dictionary<int, string> _dbfIdToName = new Dictionary<int, string>() { };
+
+        // Creating hashtable of all cards in game for efficient lookup
+        private static void GetCardHashTable()
+        {
+            // Making API call to get info on all cards via api
+            var httpClient = new HttpClient();
+            var response = httpClient.GetAsync("https://api.hearthstonejson.com/v1/latest/enUS/cards.json").Result;
+            HttpContent content = response.Content;
+            string stringContent = content.ReadAsStringAsync().Result;
+
+            // Convert the string content to a JSON object
+            dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
+            
+            foreach (var card in jsonContent)
+            {
+                _dbfIdToName.Add((int)card.dbfId, (string)card.name);
+            }
+
+            // testing indexing the hashtable
+            Log.Info("dbfId 91661: " + _dbfIdToName[91661]);
+        }
+
 
         // Triggered when the game starts
         internal static void GameStart()
@@ -38,6 +63,7 @@ namespace HDT_OpponentGuesser
             _class = null; // reset the class for this new game
             _firstTurn = true; // reset the first turn for this new game
             _metaClassDecks = null;
+            GetCardHashTable();
         } 
 
         // Triggered when a turn starts
@@ -49,12 +75,12 @@ namespace HDT_OpponentGuesser
                 _opponent = _game.Opponent;
                 _class = _opponent.Class;
                 _class = _class.ToUpper();
+
                 Log.Info("Start of first turn: opponent class is " + _class);
 
                 #region Do an API call to get a list of all meta decks
                 // Create the URL
                 string url = "https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=GOLD&Region=ALL&TimeRange=CURRENT_PATCH";
-                Log.Info("url: " + url);
 
 
                 // Create the HTTP client
@@ -68,7 +94,6 @@ namespace HDT_OpponentGuesser
 
                 // Get the string content
                 string stringContent = content.ReadAsStringAsync().Result;
-                Log.Info("stringContent: " + stringContent);
                 content.Dispose();
                 client.Dispose();
                 #endregion
@@ -76,20 +101,15 @@ namespace HDT_OpponentGuesser
                 #region Getting the list of meta decks for this class
                 // Convert the string content to a JSON object
                 dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
-                //Log.Info("jsonContent: " + jsonContent);
-                Log.Info("jsonContent type: " + jsonContent.GetType());
 
                 // Get the jsonContent.series.data and store it to "allDecks"
                 JObject allDecks = jsonContent.series.data;
-                Log.Info("All Decks: " + allDecks);
-                Log.Info("All Decks type: " + allDecks.GetType());
 
                 // Log the available keys
                 Log.Info("All Decks keys: " + allDecks.Properties().Select(p => p.Name));
 
                 // Get the Decks for this class only
                 _metaClassDecks = allDecks[_class];
-                Log.Info("Meta Decks for this class: " + _metaClassDecks);
 
 
                 #region Transform deck_list into a 1D array
@@ -109,7 +129,6 @@ namespace HDT_OpponentGuesser
                     {
                         for (int k = 0; k < deckCardsMatrix[j][1]; k++)
                         {
-                            Log.Info("Adding " + deckCardsMatrix[j][0] + " to the deck ...");
                             deckCards.Add(deckCardsMatrix[j][0]);
                         }
                     }
@@ -168,19 +187,15 @@ namespace HDT_OpponentGuesser
             Log.Info("Looping through _metaClassDecks ...");
             for(int i=0; i<_metaClassDecks.Count(); i++)
             {
-                Log.Info("Meta Deck " + i + ": " + _metaClassDecks[i]);
                 List<int> deckList = JsonConvert.DeserializeObject<List<int>>(_metaClassDecks[i]["deck_list"].ToString());
                 int matchCount = 0;
-                Log.Info("Decklist is: " + string.Join(", ",deckList));
 
                 // Loop through the deckPlayedCardsDbfId
                 foreach (int cardDbfId in deckPlayedCardsDbfId)
                 {
-                    Log.Info("Checking if " + cardDbfId + " is in the decklist ...");
                     // If this card is in the deckList, increment the matchCount and pop only the first instance of it from the deckList so it can't be matched again
                     if (deckList.Contains(cardDbfId))
                     {
-                        Log.Info("Match found!");
                         matchCount++;
                         deckList.Remove(cardDbfId);
                     }
@@ -221,7 +236,6 @@ namespace HDT_OpponentGuesser
                 #region Do an API call to get info on this decks archetype
                 // Create the URL
                 string url = $"https://hsreplay.net/api/v1/archetypes/{archetypeId}";
-                Log.Info("url: " + url);
 
                 // Create the HTTP client
                 HttpClient client = new HttpClient();
@@ -234,7 +248,6 @@ namespace HDT_OpponentGuesser
 
                 // Get the string content
                 string stringContent = content.ReadAsStringAsync().Result;
-                Log.Info("stringContent: " + stringContent);
                 content.Dispose();
                 client.Dispose();
                 #endregion
@@ -242,8 +255,6 @@ namespace HDT_OpponentGuesser
                 #region Getting the archetype name from this info
                 // Convert the string content to a JSON object
                 dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
-                //Log.Info("jsonContent: " + jsonContent);
-                Log.Info("jsonContent type: " + jsonContent.GetType());
 
                 // Get the name from this JSON object
                 string bestDeckName = jsonContent["name"];
@@ -251,6 +262,14 @@ namespace HDT_OpponentGuesser
                 #endregion
 
                 Log.Info("Best fit deck is archetype "+bestDeckName+" at index " + bestFitDeckIndex +  " (" + _metaClassDecks[bestFitDeckIndex]["deck_id"] + ") with a " + bestFitDeckMatchPercent + "% match (greater than minimum of " + _minimumMatch + "%) and a " + bestWinRate + "% winrate");
+
+                // iterate through each card in bestFitDeck
+                List<int> bestDeckList = JsonConvert.DeserializeObject<List<int>>(bestFitDeck["deck_list"].ToString());
+                foreach (int cardDbfId in bestDeckList)
+                {
+                    Log.Info("Card predicted to have: " + _dbfIdToName[cardDbfId]);
+
+                }
 
             }
             else
@@ -296,7 +315,7 @@ namespace HDT_OpponentGuesser
 
         public string Author => "Dmuss";
 
-        public Version Version => new Version(0, 0, 10);
+        public Version Version => new Version(0, 0, 12);
 
         public MenuItem MenuItem => null;
     }
