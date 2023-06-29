@@ -41,7 +41,7 @@ namespace HDT_OpponentGuesser
 
             if (deckName != null && winRate != -1 && bestFitDeckMatchPercent != -1 && deckId != null)
             {
-                this.deckNameBlock.Text = deckName;
+                this.deckNameBlock.Text = deckName + "("+ deckId.Substring(0, 4)+")"; // including first 4 characters of deckId to differentiate between decks with same name
                 this.winRateBlock.Text = ((int)Math.Round((double)winRate)).ToString() + "% WR";
                 this.matchPercentBlock.Text = ((int)Math.Round((double)bestFitDeckMatchPercent)).ToString() + "% Match";
                 this.viewDeckBlock.Visibility = Visibility.Visible;
