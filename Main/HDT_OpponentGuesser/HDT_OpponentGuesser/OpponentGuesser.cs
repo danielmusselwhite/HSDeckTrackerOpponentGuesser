@@ -33,7 +33,7 @@ namespace HDT_OpponentGuesser
         private string _allMetaDecks; // string containing all meta decks from the API call
 
         //TODO - possibly make this an option for user to set in the GUI
-        private double _minimumMatch = 50; // minimum % of cards that must match for a deck to be considered a possible match
+        private double _minimumMatch = 10; // minimum % of cards that must match for a deck to be considered a possible match
 
         // Creating constructor that takes in a reference to the BestFitDeckDisplay class
         public OpponentGuesser(BestFitDeckDisplay displayBestFitDeck)
@@ -43,6 +43,7 @@ namespace HDT_OpponentGuesser
             GetCardHashTable();
 
             _bfdDisplay = displayBestFitDeck;
+            _bfdDisplay.SetMinimumMatch(_minimumMatch);
             if (Config.Instance.HideInMenu && _game.IsInMenu)
             {
                 _bfdDisplay.Hide();
@@ -81,7 +82,7 @@ namespace HDT_OpponentGuesser
 
             // Convert the string content to a JSON object
             dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
-            
+
             foreach (var card in jsonContent)
             {
                 _dbfIdToName.Add((int)card.dbfId, (string)card.name);
@@ -102,7 +103,7 @@ namespace HDT_OpponentGuesser
             _metaClassDecks = null;
             _bfdDisplay.Update(null); // update the display to show the default text
             _bfdDisplay.Show(); // show the display
-        } 
+        }
 
         // Triggered when a turn starts
         internal void TurnStart(ActivePlayer player)
@@ -110,8 +111,8 @@ namespace HDT_OpponentGuesser
             // Couldn't be done in GameStart, as the opponent's class is not known until the first turn
 
             // setting up params on the first turn of the game once opponent has loaded in
-            if (_firstTurn) 
-            { 
+            if (_firstTurn)
+            {
                 _opponent = _game.Opponent;
                 _class = _opponent.Class;
                 _class = _class.ToUpper();
@@ -155,14 +156,14 @@ namespace HDT_OpponentGuesser
                     }
 
                     // then replace the deck_list's value with the 1D list
-                    _metaClassDecks[i]["deck_list"] = "["+string.Join(",", deckCards)+"]";
+                    _metaClassDecks[i]["deck_list"] = "[" + string.Join(",", deckCards) + "]";
 
 
                 }
 
                 #endregion
 
-                _firstTurn=false;
+                _firstTurn = false;
 
                 #endregion
             }
@@ -182,7 +183,7 @@ namespace HDT_OpponentGuesser
             allPlayedCards.Add(card);
             string allPlayedCardsString = string.Join(", ", allPlayedCards.Select(c => c.Name));
             Log.Info($"Opponent has played {allPlayedCards.Count()} cards in total ({allPlayedCardsString})");
-            
+
             // Filter by cards that originated from their deck
             List<Card> deckPlayedCards = allPlayedCards.Where(c => !c.IsCreated && card.Collectible).ToList(); // cards must be collectible (eg not a token) and have not been created
             string deckPlayedCardsString = string.Join(", ", deckPlayedCards.Select(c => c.Name));
@@ -206,7 +207,7 @@ namespace HDT_OpponentGuesser
             double bestFitDeckMatchPercent = _minimumMatch; // we are checking for strict improvement, so this value means we only consider guessing decks that match more than this percentage
             double bestWinRate = -1;
             Log.Info("Looping through _metaClassDecks ...");
-            for(int i=0; i<_metaClassDecks.Count(); i++)
+            for (int i = 0; i < _metaClassDecks.Count(); i++)
             {
                 List<int> deckList = JsonConvert.DeserializeObject<List<int>>(_metaClassDecks[i]["deck_list"].ToString());
                 int matchCount = 0;
@@ -225,7 +226,7 @@ namespace HDT_OpponentGuesser
                 // Calculate the match percentage and winrate
                 double matchPercent = (double)matchCount / (double)deckPlayedCardsDbfId.Count() * 100;
                 double winRate = (double)_metaClassDecks[i]["win_rate"];
-                Log.Info("Match count: " + matchCount + ", Cards played from deck: " + deckPlayedCardsDbfId.Count()+ " ("+matchPercent+") winrate");
+                Log.Info("Match count: " + matchCount + ", Cards played from deck: " + deckPlayedCardsDbfId.Count() + " (" + matchPercent + ") winrate");
 
                 // If this deck has a higher match percentage than the previous best fit, replace it
                 if (matchPercent > bestFitDeckMatchPercent)
@@ -244,9 +245,9 @@ namespace HDT_OpponentGuesser
                         bestWinRate = winRate;
                     }
                 }
-                Log.Info("Deck " + i + "("+ _metaClassDecks[i]["deck_id"] + ")"+" has a " + matchPercent + "% match with the cards played, and a " + winRate + "% winrate");
+                Log.Info("Deck " + i + "(" + _metaClassDecks[i]["deck_id"] + ")" + " has a " + matchPercent + "% match with the cards played, and a " + winRate + "% winrate");
             }
-            if(bestFitDeckIndex != -1)
+            if (bestFitDeckIndex != -1)
             {
                 JToken bestFitDeck = _metaClassDecks[bestFitDeckIndex];
                 string archetypeId = bestFitDeck["archetype_id"].ToString();
@@ -282,7 +283,7 @@ namespace HDT_OpponentGuesser
                 #endregion
                 #endregion
 
-                Log.Info("Best fit deck is archetype "+bestDeckName+" at index " + bestFitDeckIndex +  " (" + _metaClassDecks[bestFitDeckIndex]["deck_id"] + ") with a " + bestFitDeckMatchPercent + "% match (greater than minimum of " + _minimumMatch + "%) and a " + bestWinRate + "% winrate");
+                Log.Info("Best fit deck is archetype " + bestDeckName + " at index " + bestFitDeckIndex + " (" + _metaClassDecks[bestFitDeckIndex]["deck_id"] + ") with a " + bestFitDeckMatchPercent + "% match (greater than minimum of " + _minimumMatch + "%) and a " + bestWinRate + "% winrate");
 
                 // iterate through each card in bestFitDeck
                 List<int> bestDeckList = JsonConvert.DeserializeObject<List<int>>(bestFitDeck["deck_list"].ToString());
@@ -293,7 +294,8 @@ namespace HDT_OpponentGuesser
                 }
 
                 // Display the deck name in the overlay
-                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent);
+
+                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeck["deck_id"].ToString());
             }
             else
             {
@@ -305,7 +307,7 @@ namespace HDT_OpponentGuesser
             #endregion
         }
 
-        
+
         // Triggered when the player enters menu
         internal void InMenu()
         {
@@ -315,7 +317,7 @@ namespace HDT_OpponentGuesser
                 _bfdDisplay.Hide();
             }
         }
-    
+
     }
 
 }

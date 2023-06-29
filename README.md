@@ -9,6 +9,20 @@
 
 # Development Notes
 
+## TODO's - Core
+
+- FEATURE: Make the predicted deck list appear on hover over the "view" button 
+- BUG: When "view" button is clicked - it sometimes loads more than 1 tab, find out why
+- BUG: Gives Null reference errors if HDT is Started AFTER a game is already in progress (low priority fix as not common for this to be done outside of dev)
+
+## TODO's - Interesting
+
+- Given we are detecting opponent's deck, may be interesting to collate the data to get in-depth W/L vs Deck Archetype not just vs Class
+- Could likely adapt what I use to find best fit of opponents deck, to  find the best fit of users deck to then display the mulligan guide for them on turn 1?
+- Have it detect game mode and send API requests for that mode (e.g. Standard vs Wild) - honestly okay with it just doing ranked_standard for now though as its most popular
+
+
+
 ## Debugging
 
 **If you get anything in log of hsreplay saying "The located assembly's manifest definition does not match the assembly reference."**
