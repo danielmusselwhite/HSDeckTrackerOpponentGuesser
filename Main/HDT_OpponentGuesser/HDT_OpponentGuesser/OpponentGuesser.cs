@@ -4,8 +4,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
+
+// Added additional ones I require - these will need their DLL's manually added to HSReplay
+using Newtonsoft.Json;
 
 // Adding the hearthstone deck tracker references required for creating the plugin
 using System.Windows.Controls;
@@ -14,6 +16,7 @@ using Hearthstone_Deck_Tracker.Enums;
 using Hearthstone_Deck_Tracker.Hearthstone;
 using Hearthstone_Deck_Tracker.Plugins;
 using Hearthstone_Deck_Tracker.Utility.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace HDT_OpponentGuesser
 {
@@ -22,7 +25,7 @@ namespace HDT_OpponentGuesser
         private static GameV2 _game;
         private static Player _opponent;
         private static string _class;
-        private static List<dynamic> _metaClassDecks;
+        private static JToken _metaClassDecks;
 
         // Triggered when the game starts
         internal static async void GameStart()
@@ -42,11 +45,10 @@ namespace HDT_OpponentGuesser
             if (_class == null)
             {
                 _class = _opponent.Class;
+                _class = _class.ToUpper();
                 Log.Info("Start of first turn: opponent class is " + _class);
 
-                // Do an API call to get a list of all meta decks
-                // based off of: $response = Invoke-RestMethod 'https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=BRONZE_THROUGH_GOLD&Region=ALL&TimeRange=CURRENT_PATCH' -Method 'GET' -Headers $headers
-
+                #region Do an API call to get a list of all meta decks
                 // Create the URL
                 string url = "https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=GOLD&Region=ALL&TimeRange=CURRENT_PATCH";
                 Log.Info("url: " + url);
@@ -66,25 +68,33 @@ namespace HDT_OpponentGuesser
                 Log.Info("stringContent: " + stringContent);
                 content.Dispose();
                 client.Dispose();
+                #endregion
 
                 #region Getting the list of meta decks for this class
-                // Parse the JSON
-                var json = JsonSerializer.Deserialize<dynamic>(stringContent);
-                Log.Info("json: " + json);
+                // Convert the string content to a JSON object
+                dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
+                //Log.Info("jsonContent: " + jsonContent);
+                Log.Info("jsonContent type: " + jsonContent.GetType());
 
-                // Get all decks from the json
-                var decks = json["series"]["data"];
-                Log.Info("decks: " + decks);
+                // Get the jsonContent.series.data and store it to "allDecks"
+                JObject allDecks = jsonContent.series.data;
+                Log.Info("All Decks: " + allDecks);
+                Log.Info("All Decks type: " + allDecks.GetType());
 
-                // Filter the decks by those with class field matching _class
-                foreach (var deck in decks)
-                {
-                    if (deck["class"] == _class)
-                    {
-                        _metaClassDecks.Add(deck);
-                        Log.Info("Added deck to _metaClassDecks: " + deck);
-                    }
-                }
+                // Log the available keys
+                Log.Info("All Decks keys: " + allDecks.Properties().Select(p => p.Name));
+
+                // Get the Decks for this class only
+                _metaClassDecks = allDecks[_class];
+                Log.Info("Meta Decks for this class: " + _metaClassDecks);
+                
+                // Testing indexing the meta decks
+                Log.Info("Meta Deck 1: " + _metaClassDecks[0]);
+                Log.Info("Meta Deck 1 info: Deck ID = " + _metaClassDecks[0]["deck_id"] + "Win Rate = " + _metaClassDecks[0]["win_rate"]);
+
+
+
+
 
                 #endregion
 
@@ -151,7 +161,7 @@ namespace HDT_OpponentGuesser
 
         public string Author => "Dmuss";
 
-        public Version Version => new Version(0, 0, 4);
+        public Version Version => new Version(0, 0, 5);
 
         public MenuItem MenuItem => null;
     }
