@@ -20,7 +20,7 @@ namespace HDT_OpponentGuesser
 {
     public partial class BestFitDeckDisplay : UserControl
     {
-        private string _deckId = "";
+        private string _deckId = null;
         private double _minimumMatch;
         private DateTime _timeAFterClick = DateTime.Now;
 

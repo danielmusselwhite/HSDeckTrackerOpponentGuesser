@@ -185,7 +185,7 @@ namespace HDT_OpponentGuesser
             Log.Info($"Opponent has played {allPlayedCards.Count()} cards in total ({allPlayedCardsString})");
 
             // Filter by cards that originated from their deck
-            List<Card> deckPlayedCards = allPlayedCards.Where(c => !c.IsCreated && card.Collectible).ToList(); // cards must be collectible (eg not a token) and have not been created
+            List<Card> deckPlayedCards = allPlayedCards.Where(c => !c.IsCreated && c.Collectible).ToList(); // cards must be collectible (eg not a token) and have not been created
             string deckPlayedCardsString = string.Join(", ", deckPlayedCards.Select(c => c.Name));
             Log.Info($"Opponent has played {deckPlayedCards.Count()} cards from their deck in total ({deckPlayedCardsString})");
             #endregion
@@ -200,7 +200,7 @@ namespace HDT_OpponentGuesser
             {
                 deckPlayedCardsDbfId.Add(cardPlayed.DbfId);
             }
-            Log.Info("deckPlayedCardsDbfId: " + deckPlayedCardsDbfId);
+            Log.Info("deckPlayedCardsDbfId: " + deckPlayedCardsDbfId.ToString());
 
             // Loop through _metaClassDecks and find which has the most cards in common with deckPlayedCards
             int bestFitDeckIndex = -1;
@@ -251,6 +251,7 @@ namespace HDT_OpponentGuesser
             {
                 JToken bestFitDeck = _metaClassDecks[bestFitDeckIndex];
                 string archetypeId = bestFitDeck["archetype_id"].ToString();
+                string bestFitDeckId = bestFitDeck["deck_id"].ToString();
 
                 // API call toget name of deck with this archetype_id
 
@@ -283,7 +284,7 @@ namespace HDT_OpponentGuesser
                 #endregion
                 #endregion
 
-                Log.Info("Best fit deck is archetype " + bestDeckName + " at index " + bestFitDeckIndex + " (" + _metaClassDecks[bestFitDeckIndex]["deck_id"] + ") with a " + bestFitDeckMatchPercent + "% match (greater than minimum of " + _minimumMatch + "%) and a " + bestWinRate + "% winrate");
+                Log.Info("Best fit deck is archetype " + bestDeckName + " at index " + bestFitDeckIndex + " (" + bestFitDeckId + ") with a " + bestFitDeckMatchPercent + "% match (greater than minimum of " + _minimumMatch + "%) and a " + bestWinRate + "% winrate");
 
                 // iterate through each card in bestFitDeck
                 List<int> bestDeckList = JsonConvert.DeserializeObject<List<int>>(bestFitDeck["deck_list"].ToString());
@@ -294,8 +295,7 @@ namespace HDT_OpponentGuesser
                 }
 
                 // Display the deck name in the overlay
-
-                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeck["deck_id"].ToString());
+                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId);
             }
             else
             {

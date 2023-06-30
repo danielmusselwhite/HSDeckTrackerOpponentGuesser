@@ -4,12 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HDT_OpponentGuesser"
-             mc:Ignorable="d" Width="293" Height="52">
-    <Grid Background="Indigo" Margin="0,0,0,0">
+             mc:Ignorable="d" Width="293" Height="52"
+             BorderThickness="1" BorderBrush="Indigo"
+             >
+    <Grid Background="MediumPurple" Margin="0,0,0,0">
         <TextBlock x:Name="winRateBlock" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10" Foreground="White" TextAlignment="Center" FontWeight="Bold" HorizontalAlignment="Right" Width="79" Margin="0,0,1,0"><Run Language="en-gb" Text="yyy"/></TextBlock>
         <TextBlock x:Name="deckNameBlock" HorizontalAlignment="Center" TextWrapping="Wrap" Width="236" FontSize="20" Foreground="White" TextAlignment="Center" FontWeight="Bold" Margin="0,19,0,0" Height="30" VerticalAlignment="Top"><Run Language="en-gb" Text="zzzzzzzz"/></TextBlock>
         <TextBlock x:Name="matchPercentBlock" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Width="79" FontSize="10" Foreground="White" TextAlignment="Center" FontWeight="Bold" Margin="1,0,0,0"><Run Language="en-gb" Text="xxx"/></TextBlock>
         <TextBlock x:Name="viewDeckBlock" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" Width="87" FontSize="14" Foreground="Black" TextAlignment="Center" FontWeight="Bold" Background="DarkGoldenrod"><Run Language="en-gb" Text="View Deck"/></TextBlock>
-
     </Grid>
 </UserControl>
