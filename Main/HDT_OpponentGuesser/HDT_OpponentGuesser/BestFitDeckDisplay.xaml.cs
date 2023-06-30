@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -18,7 +19,7 @@ using System.Windows.Shapes;
 
 namespace HDT_OpponentGuesser
 {
-    public partial class BestFitDeckDisplay : UserControl
+    public partial class BestFitDeckDisplay : System.Windows.Controls.UserControl
     {
         private string _deckId = null;
         private double _minimumMatch;
@@ -28,6 +29,7 @@ namespace HDT_OpponentGuesser
         {
             InitializeComponent();
             Update(null);
+            canvasDeckView.Visibility = Visibility.Hidden;
         }
 
         public void SetMinimumMatch(double minimumMatch)
@@ -42,25 +44,27 @@ namespace HDT_OpponentGuesser
 
             if (deckName != null && winRate != -1 && bestFitDeckMatchPercent != -1 && deckId != null)
             {
-                this.deckNameBlock.Text = deckName + "("+ deckId.Substring(0, 4)+")"; // including first 4 characters of deckId to differentiate between decks with same name
+                this.deckNameBlock.Text = deckName + " (" + deckId.Substring(0, 4) + ")"; // including first 4 characters of deckId to differentiate between decks with same name
                 this.winRateBlock.Text = ((int)Math.Round((double)winRate)).ToString() + "% WR";
                 this.matchPercentBlock.Text = ((int)Math.Round((double)bestFitDeckMatchPercent)).ToString() + "% Match";
-                this.viewDeckBlock.Visibility = Visibility.Visible;
+                this.viewDeckButton.Visibility = Visibility.Visible;
+                // TODO - add here a call to update the canvasDeckView with all the cards in the deck
             }
             else
             {
-                this.deckNameBlock.Text = "No Matches Above "+_minimumMatch+"%";
+                this.deckNameBlock.Text = "No Matches Above " + _minimumMatch + "%";
                 this.winRateBlock.Text = "";
                 this.matchPercentBlock.Text = "";
-                this.viewDeckBlock.Visibility = Visibility.Hidden;
+                this.viewDeckButton.Visibility = Visibility.Hidden;
+                this.canvasDeckView.Visibility = Visibility.Hidden;
             }
-            
+
             UpdatePosition();
         }
 
         private void UpdatePosition()
         {
-            Canvas.SetBottom(this, 100);
+            Canvas.SetBottom(this, 12);
             Canvas.SetLeft(this, 100);
         }
 
@@ -74,39 +78,44 @@ namespace HDT_OpponentGuesser
             this.Visibility = Visibility.Hidden;
         }
 
-        //Function to check if the mouse is over the control, and if so view the deck
+        //Function to check if the mouse is over the controls various components, and if so view the deck
         public void HandleMouseOver()
         {
             // If hearthstone is in the foreground
             if (User32.IsHearthstoneInForeground())
             {
-                // if the viewDeckBlock is visible
-                if (this.viewDeckBlock.Visibility == Visibility.Visible)
+                // If Mouse is Over the the viewDeckButton or the canvasDeckView, then show the deck
+                if (IsMouseOverElement(this.viewDeckButton) || IsMouseOverElement(this.canvasDeckView))
                 {
-                    var pos = User32.GetMousePos();
-                    Point relativePos = this.viewDeckBlock.PointFromScreen(new Point(pos.X, pos.Y));
+                    // Highlight the button and show the deckView
+                    this.viewDeckButton.Background = Brushes.LightGoldenrodYellow;
+                    canvasDeckView.Visibility = Visibility.Visible;
 
-
-
-                    // If Mouse is Over the the viewDeckBlock, change the colour to lightblue
-                    if (relativePos.X > 0 && relativePos.X < this.viewDeckBlock.ActualWidth && relativePos.Y > 0 && relativePos.Y < this.viewDeckBlock.ActualHeight)
+                    //detect if player has clicked on the button
+                    if (IsMouseOverElement(this.viewDeckButton) && DateTime.Now > _timeAFterClick)
                     {
-                        this.viewDeckBlock.Background = Brushes.LightGoldenrodYellow;
-
-                        //detect if Mouse has already been clicked
-                        if (DateTime.Now > _timeAFterClick)
-                        {
-                            _timeAFterClick = DateTime.Now.AddSeconds(3);
-                            new User32.MouseInput().LmbDown += ViewButtonClicked;
-                        }
-
+                        _timeAFterClick = DateTime.Now.AddSeconds(3);
+                        new User32.MouseInput().LmbDown += ViewButtonClicked;
                     }
-                    else
-                    {
-                        this.viewDeckBlock.Background = Brushes.DarkGoldenrod;
-                    }
+
+                }
+                else
+                {
+                    this.viewDeckButton.Background = Brushes.DarkGoldenrod;
+                    canvasDeckView.Visibility = Visibility.Hidden;
                 }
             }
+        }
+
+        private bool IsMouseOverElement(FrameworkElement elem)
+        {
+            if (elem != null && elem.IsVisible)
+            {
+                var pos = User32.GetMousePos();
+                Point relativePos = elem.PointFromScreen(new Point(pos.X, pos.Y));
+                return relativePos.X > 0 && relativePos.X < elem.ActualWidth && relativePos.Y > 0 && relativePos.Y < elem.ActualHeight;
+            }
+            return false;
         }
 
         private void ViewButtonClicked(object sender, EventArgs eventArgs)

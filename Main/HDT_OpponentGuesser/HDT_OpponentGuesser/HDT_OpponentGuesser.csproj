@@ -33,6 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="HearthDb, Version=26.6.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="HearthstoneDeckTracker">
       <HintPath>..\..\..\..\..\..\..\..\AppData\Local\HearthstoneDeckTracker\app-1.20.10\HearthstoneDeckTracker.exe</HintPath>
     </Reference>

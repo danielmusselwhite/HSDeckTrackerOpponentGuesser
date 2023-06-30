@@ -286,11 +286,15 @@ namespace HDT_OpponentGuesser
 
                 Log.Info("Best fit deck is archetype " + bestDeckName + " at index " + bestFitDeckIndex + " (" + bestFitDeckId + ") with a " + bestFitDeckMatchPercent + "% match (greater than minimum of " + _minimumMatch + "%) and a " + bestWinRate + "% winrate");
 
-                // iterate through each card in bestFitDeck
-                List<int> bestDeckList = JsonConvert.DeserializeObject<List<int>>(bestFitDeck["deck_list"].ToString());
-                foreach (int cardDbfId in bestDeckList)
+                // iterate through each card in bestFitDeck and create a Card entity for it storing all them in a list
+                List<int> bestDeckDbfList = JsonConvert.DeserializeObject<List<int>>(bestFitDeck["deck_list"].ToString());
+                List<Card> bestDeckCardList = new List<Card>();
+                foreach (int cardDbfId in bestDeckDbfList)
                 {
                     Log.Info("Card predicted to have: " + _dbfIdToName[cardDbfId]);
+                    // create a new card using the dbfId
+
+                    
 
                 }
 
