@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,11 +13,13 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using static System.Net.Mime.MediaTypeNames;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace HDT_OpponentGuesser
 {
@@ -26,7 +29,6 @@ namespace HDT_OpponentGuesser
         private double _minimumMatch;
         private DateTime _timeAFterClick = DateTime.Now;
         private List<CardInfo> _guessedDeckList = null;
-        private bool alreadyHovering = false;
 
         public BestFitDeckDisplay()
         {
@@ -85,9 +87,6 @@ namespace HDT_OpponentGuesser
 
         private void UpdateDeckCardViews()
         {
-            Log.Info("Called UpdateDeckCardViews()");
-
-
             #region Populating canvasDeckView with the cards in the deck
             // Destroy all contents from canvasDeckView (if any)
             canvasDeckView.Children.Clear();
@@ -97,16 +96,16 @@ namespace HDT_OpponentGuesser
             List<CardView> cardViews = new List<CardView>();
             foreach (CardInfo card in _guessedDeckList)
             {
+
                 // check if cardViews already has a card with the same dbfID
                 if (cardViews.Any(x => x.GetDbfId() == card.GetDbfId()))
                 {
                     // if so, increment the count of that card
                     cardViews.Find(x => x.GetDbfId() == card.GetDbfId()).IncrementCount();
-                }
+
+                }// if not, add the card to cardViews
                 else
                 {
-                    Log.Info("Creating Card View For the Values of: " + card.GetName() + " " + card.GetCost() + " " + card.GetHealth() + " " + card.GetAttack() + " " + card.GetDescription() + " " + card.GetCardType() + " " + card.GetDbfId() + "");
-                    // if not, add the card to cardViews
                     cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), this.canvasDeckView));
                 }
             }
@@ -133,7 +132,7 @@ namespace HDT_OpponentGuesser
             if (User32.IsHearthstoneInForeground())
             {
                 // If Mouse is Over the the viewDeckButton or the canvasDeckView, then show the deck
-                if (IsMouseOverElement(this.viewDeckButton) || IsMouseOverElement(this.canvasDeckView))
+                if (IsMouseOverElement(this.viewDeckButton) || IsMouseOverElement(this.canvasDeckView) || IsMouseOverElement(this.canvasCardDetails))
                 {
                     // Highlight the button and show the deckView
                     this.viewDeckButton.Background = Brushes.LightSlateGray;
@@ -146,11 +145,31 @@ namespace HDT_OpponentGuesser
                         new User32.MouseInput().LmbDown += ViewButtonClicked; // then, if LmbDown event is triggered, call ViewButtonClicked
                     }
 
+                    // Default the card details to hidden
+                    canvasCardDetails.Visibility = Visibility.Hidden;
+                    // For each CardView in the canvasDeckView, check if the mouse is over it
+                    foreach (CardView cardView in canvasDeckView.Children)
+                    {
+
+                        if (IsMouseOverElement(cardView))
+                        {
+                            // If so, show the card details
+                            cardView.ShowCardDetails(canvasCardDetails);
+                            break;
+                        }
+                        else
+                        {
+                            // If not, hide the card details
+                            canvasCardDetails.Visibility = Visibility.Hidden;
+                        }
+                    }
+
                 }
                 else
                 {
                     this.viewDeckButton.Background = Brushes.SlateBlue;
                     canvasDeckView.Visibility = Visibility.Hidden;
+                    canvasCardDetails.Visibility = Visibility.Hidden;
                 }
             }
         }
@@ -172,11 +191,11 @@ namespace HDT_OpponentGuesser
             string url = $"https://hsreplay.net/decks/{_deckId}/#rankRange=GOLD&gameType=RANKED_STANDARD";
             Log.Debug(url);
             System.Diagnostics.Process.Start(url);
+        }
 
-
-            // TODO - find a way to show the deck
-            // Either see how they're doing it in decktracker already to replicate
-            // Or can simply do something eg make a new class called "DeckView" and "CardView" then create a CardView for each Card in the deck inside DeckView and show/hide that based on this
+        private void UpdateDeckId(string deckId)
+        {
+            _deckId = deckId;
         }
 
     }
@@ -185,7 +204,7 @@ namespace HDT_OpponentGuesser
     // Class to represent cards view in the decklist; taking in on creation: count, name, cost, health, attack, description
     public class CardView : TextBlock
     {
-        private string _name;
+        private string _name ;
         private int _cost;
         private string _health;
         private string _attack;
@@ -215,13 +234,13 @@ namespace HDT_OpponentGuesser
             _rarity = rarity;
 
 
-            // create a dict of Type:Color, where: Minion:Orange, Spell:Cyan, Secret:Blue, Weapon:Magenta, Location:Yellow
+            // create a dict of Type:Color, where: Minion:Orange, Spell:Blue, Secret:Magenta, Weapon:Magenta, Location:Yellow
             Dictionary<string, SolidColorBrush> typeColorDict = new Dictionary<string, SolidColorBrush>();
             typeColorDict.Add("MINION", Brushes.Maroon);
-            typeColorDict.Add("SPELL", Brushes.DarkCyan);
-            typeColorDict.Add("SECRET", Brushes.DarkBlue);
-            typeColorDict.Add("WEAPON", Brushes.DarkMagenta);
-            typeColorDict.Add("LOCATION", Brushes.DarkGoldenrod);
+            typeColorDict.Add("SPELL", Brushes.DarkBlue);
+            typeColorDict.Add("SECRET", Brushes.DarkMagenta);
+            typeColorDict.Add("WEAPON", Brushes.DarkGoldenrod);
+            typeColorDict.Add("LOCATION", Brushes.DarkGreen);
 
             // create a new textblock to display the cost, name, and count inside of canvasDeckView
             this.Name = "deckCard" + cardNumber;
@@ -266,7 +285,146 @@ namespace HDT_OpponentGuesser
         private string UpdateText()
         {
             // ternary to also add a star symbol if rarity is "LEGENDARY"
-            return _count+"x   |   " + _cost + " Mana   |   " + _name + (_rarity == "LEGENDARY" ? " | ★" : ""); ;
+            return _count+"x   |   " + _cost + " Mana   |   " + _name + (_rarity == "LEGENDARY" ? " ★" : "");
+        }
+
+        public void ShowCardDetails(Canvas canvas)
+        {
+            // clear the canvas
+            canvas.Children.Clear();
+
+            CardDetailsCanvasPopulator.populateCardDetails(canvas, _name, _cost, _health, _attack, _description, _cardType, _rarity, this.Background);
+        }
+    }
+    public static class CardDetailsCanvasPopulator
+    {
+        public static void populateCardDetails(Canvas canvasCardDetails, string cardNameText, int cardManaValue, string cardHealthText,
+        string cardAttackText, string cardDescriptionText, string cardTypeText, string rarity, Brush typeColor)
+        {
+            Dictionary<string, SolidColorBrush> typeColorDict = new Dictionary<string, SolidColorBrush>();
+            typeColorDict.Add("MINION", Brushes.RosyBrown);
+            typeColorDict.Add("SPELL", Brushes.PaleTurquoise);
+            typeColorDict.Add("SECRET", Brushes.LightPink);
+            typeColorDict.Add("WEAPON", Brushes.Beige);
+            typeColorDict.Add("LOCATION", Brushes.DarkSeaGreen);
+
+            canvasCardDetails.Name = "canvasCardDetails";
+            canvasCardDetails.Background = typeColorDict[cardTypeText];
+            canvasCardDetails.Margin = new Thickness(479, 432, 125, 146);
+
+            // Create and configure the text blocks
+            var CardName = new TextBlock
+            {
+                Name = "cardName",
+                TextWrapping = TextWrapping.Wrap,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 14,
+                Foreground = Brushes.Black,
+                TextAlignment = TextAlignment.Center,
+                FontWeight = FontWeights.Bold,
+                Width = 187
+            };
+            CardName.Text = cardNameText;
+            Canvas.SetLeft(CardName, 0);
+            Canvas.SetTop(CardName, 33);
+            canvasCardDetails.Children.Add(CardName);
+
+            var CardMana = new TextBlock
+            {
+                Name = "cardMana",
+                TextWrapping = TextWrapping.Wrap,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 18,
+                Foreground = Brushes.White,
+                Background = Brushes.DarkCyan,
+                TextAlignment = TextAlignment.Center,
+                FontWeight = FontWeights.Bold,
+                Width = 57,
+                Height = 27
+            };
+            CardMana.Text = cardManaValue.ToString()+ " 💎";
+            Canvas.SetLeft(CardMana, 0);
+            Canvas.SetTop(CardMana, 0);
+            canvasCardDetails.Children.Add(CardMana);
+
+            // if type is minion, show health and attack
+            if (cardTypeText == "MINION")
+            {
+                var CardHealth = new TextBlock
+                {
+                    Name = "cardHealth",
+                    TextWrapping = TextWrapping.Wrap,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FontSize = 18,
+                    Foreground = Brushes.White,
+                    Background = Brushes.DarkRed,
+                    TextAlignment = TextAlignment.Center,
+                    FontWeight = FontWeights.Bold,
+                    Width = 93,
+                    Height = 27
+                };
+                CardHealth.Text = cardHealthText+ " ♡";
+                Canvas.SetLeft(CardHealth, 94);
+                Canvas.SetTop(CardHealth, 228);
+                canvasCardDetails.Children.Add(CardHealth);
+
+                var CardAttack = new TextBlock
+                {
+                    Name = "cardAttack",
+                    TextWrapping = TextWrapping.Wrap,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FontSize = 18,
+                    Foreground = Brushes.White,
+                    Background = Brushes.DarkGoldenrod,
+                    TextAlignment = TextAlignment.Center,
+                    FontWeight = FontWeights.Bold,
+                    Width = 93,
+                    Height = 27
+                };
+                CardAttack.Text = cardAttackText+ " ⚔";
+                Canvas.SetLeft(CardAttack, 0);
+                Canvas.SetTop(CardAttack, 228);
+                canvasCardDetails.Children.Add(CardAttack);
+            }
+
+            var CardDescription = new TextBlock
+            {
+                Name = "cardDescription",
+                TextWrapping = TextWrapping.Wrap,
+                VerticalAlignment = VerticalAlignment.Top,
+                FontSize = 10,
+                Foreground = Brushes.Black,
+                TextAlignment = TextAlignment.Left,
+                FontWeight = FontWeights.Bold,
+                Width = 177,
+                Height = 104
+            };
+            // remove anything inside of <> and any instances of "[x]" from description
+            CardDescription.Text = Regex.Replace(Regex.Replace(cardDescriptionText, @"<[^>]*>", String.Empty), @"\[[^]]*\]", String.Empty);
+            Canvas.SetLeft(CardDescription, 5);
+            Canvas.SetTop(CardDescription, 108);
+            canvasCardDetails.Children.Add(CardDescription);
+
+            var CardType = new TextBlock
+            {
+                Name = "cardType",
+                TextWrapping = TextWrapping.Wrap,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 16,
+                Foreground = Brushes.White,
+                Background = typeColor,
+                TextAlignment = TextAlignment.Right,
+                FontWeight = FontWeights.Bold,
+                Width = 133,
+                Height = 27
+            };
+            CardType.Text = (rarity == "LEGENDARY" ? "★ | " : "") + cardTypeText;
+            Canvas.SetLeft(CardType, 54);
+            Canvas.SetTop(CardType, 0);
+            canvasCardDetails.Children.Add(CardType);
+
+            // Add the text blocks to the canvas
+            canvasCardDetails.Visibility = Visibility.Visible;
         }
     }
 }

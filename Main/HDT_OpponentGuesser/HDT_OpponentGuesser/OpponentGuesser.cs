@@ -100,21 +100,17 @@ namespace HDT_OpponentGuesser
                 string rarity = (string)card.rarity;
                 if (type != null)
                 {
-                    if (type.ToUpper() == "SPELL" && card.mechanics != null && card.mechanics.Contains("Secret"))
+                    if (type.ToUpper() == "SPELL" && card.mechanics != null && card.mechanics.ToString().Contains("SECRET"))
                         type = "SECRET";
                     else if (type.ToUpper() == "MINION")
                     {
                         health = (string)card.health;
                         attack = (string)card.attack;
                     }
-                    if (card.text != null)
-                        description = (string)card.description;
-                    
                 }
-                else
+                if (card.text != null)
                 {
-                    // Log the card that doesn't have a type
-                    Log.Info("Card with no type: " + name + " ("+dbfId+")");
+                    description = (string)card.text;
                 }
                 _dbfIdToCardInfo.Add(dbfId, new Dictionary<string, string>() { { "cost", cost }, { "name", name }, { "health", health }, { "attack", attack }, { "description", description }, { "type", type }, { "rarity", rarity } });
             }
@@ -147,8 +143,6 @@ namespace HDT_OpponentGuesser
                 _class = _opponent.Class;
                 _class = _class.ToUpper();
 
-                Log.Info("Start of first turn: opponent class is " + _class);
-
                 #region Parsing the _allMetaDecks JSON String to get the list of meta decks for this class
                 // Convert the string content to a JSON object
                 string stringContent = _allMetaDecks;
@@ -156,9 +150,6 @@ namespace HDT_OpponentGuesser
 
                 // Get the jsonContent.series.data and store it to "allDecks"
                 JObject allDecks = jsonContent.series.data;
-
-                // Log the available keys
-                Log.Info("All Decks keys: " + allDecks.Properties().Select(p => p.Name));
 
                 // Get the Decks for this class only
                 _metaClassDecks = allDecks[_class];
@@ -171,7 +162,6 @@ namespace HDT_OpponentGuesser
                 // for each deck in _metaClassDecks
                 for (int i = 0; i < _metaClassDecks.Count(); i++)
                 {
-                    Log.Info("Getting the deck_list for deck " + i + " ...");
                     // first convert the string to a matrix
                     List<List<int>> deckCardsMatrix = JsonConvert.DeserializeObject<List<List<int>>>(_metaClassDecks[i]["deck_list"].ToString());
 
@@ -256,7 +246,6 @@ namespace HDT_OpponentGuesser
                 // Calculate the match percentage and winrate
                 double matchPercent = (double)matchCount / (double)deckPlayedCardsDbfId.Count() * 100;
                 double winRate = (double)_metaClassDecks[i]["win_rate"];
-                Log.Info("Match count: " + matchCount + ", Cards played from deck: " + deckPlayedCardsDbfId.Count() + " (" + matchPercent + ") winrate");
 
                 // If this deck has a higher match percentage than the previous best fit, replace it
                 if (matchPercent > bestFitDeckMatchPercent)
@@ -275,7 +264,6 @@ namespace HDT_OpponentGuesser
                         bestWinRate = winRate;
                     }
                 }
-                Log.Info("Deck " + i + "(" + _metaClassDecks[i]["deck_id"] + ")" + " has a " + matchPercent + "% match with the cards played, and a " + winRate + "% winrate");
             }
             #endregion
 
@@ -339,9 +327,8 @@ namespace HDT_OpponentGuesser
                     _guessedDeckListCards.Add(new CardInfo(cardDbfId, cardName, cardCost, cardHealth, cardAttack, cardDescription, cardType, rarity, false)); // false as not been played yet
                 }
 
-                // Sort _guessedDeckListCards by the cost of the cards (descending), with equal costs being sorted alphabetically (ascending)
+                // Sort _guessedDeckListCards by the cost of the cards (descending)
                 _guessedDeckListCards.Sort((x, y) => x.GetName().CompareTo(y.GetName()));
-                _guessedDeckListCards.Sort((x, y) => y.GetCost().CompareTo(x.GetCost()));
 
                 // Display the deck name in the overlay
                 _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId, _guessedDeckListCards);

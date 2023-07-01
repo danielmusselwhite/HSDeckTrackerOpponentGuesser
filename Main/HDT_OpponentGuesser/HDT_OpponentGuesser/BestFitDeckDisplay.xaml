@@ -4,11 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HDT_OpponentGuesser"
-             mc:Ignorable="d" Width="293" Height="833"
+             mc:Ignorable="d" Width="791" Height="833"
              >
     <Grid Margin="0,0,0,0">
 
-        <Canvas x:Name="canvasMain" HorizontalAlignment="Center" Width="292" Background="DimGray" Margin="0,782,0,0">
+        <Canvas x:Name="canvasMain" HorizontalAlignment="Left" Width="292" Background="DimGray" Margin="0,782,0,0">
             <TextBlock x:Name="winRateBlock" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="12" Foreground="White" TextAlignment="Center" FontWeight="Bold" HorizontalAlignment="Right" Width="79" Canvas.Left="214"><Run Language="en-gb" Text="yyy"/></TextBlock>
             <TextBlock x:Name="deckNameBlock" HorizontalAlignment="Left" TextWrapping="Wrap" Width="230" FontSize="14" Foreground="White" TextAlignment="Center" FontWeight="Bold" Height="21" VerticalAlignment="Top" Canvas.Left="32" Canvas.Top="30"><Run Language="en-gb" Text="zzzzzzzz"/></TextBlock>
             <TextBlock x:Name="matchPercentBlock" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center" Width="79" FontSize="12" Foreground="White" TextAlignment="Center" FontWeight="Bold"><Run Language="en-gb" Text="xxx"/></TextBlock>
@@ -16,7 +16,16 @@
         </Canvas>
 
         <!-- The Deck View Itself -->
-        <Canvas x:Name="canvasDeckView" HorizontalAlignment="Center" Height="580" VerticalAlignment="Bottom" Width="292" Background="DarkGray" Margin="0,0,0,51"/>
+        <Canvas x:Name="canvasDeckView" Margin="0,0,499,51" HorizontalAlignment="Right" Width="292" Height="580" VerticalAlignment="Bottom"/>
 
+
+        <Canvas x:Name="canvasCardDetails" Background="Beige" Margin="479,432,125,146">
+            <TextBlock x:Name="cardName" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="16" Foreground="Black" TextAlignment="Center" FontWeight="Bold" HorizontalAlignment="Left" Width="187" Canvas.Top="33"><Run Language="en-gb" Text="yyy"/></TextBlock>
+            <TextBlock x:Name="cardMana" Text="0" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="18" Foreground="White" Background="DarkCyan" TextAlignment="Center" FontWeight="Bold" HorizontalAlignment="Left" Width="57" Height="27"><Run Language="en-gb" /></TextBlock>
+            <TextBlock x:Name="cardHealth" Text="1" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="18" Foreground="White" Background="DarkRed" TextAlignment="Center" FontWeight="Bold" HorizontalAlignment="Left" Width="93" Height="27" Canvas.Left="94" Canvas.Top="228"><Run Language="en-gb" /></TextBlock>
+            <TextBlock x:Name="cardAttack" Text="2" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="18" Foreground="White" Background="DarkGoldenrod" TextAlignment="Center" FontWeight="Bold" HorizontalAlignment="Left" Width="93" Height="27" Canvas.Top="228"><Run Language="en-gb" /></TextBlock>
+            <TextBlock x:Name="cardDescription" Text="xxxxxxxxxxxx xxxxxxxx xxxx xxx xxxx" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="14" Foreground="Black"  TextAlignment="Left" FontWeight="Bold" HorizontalAlignment="Left" Width="194" Height="104" Canvas.Top="108"><Run Language="en-gb" /></TextBlock>
+            <TextBlock x:Name="cardType" Text="2" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="16" Foreground="White" Background="DarkMagenta" TextAlignment="Right" FontWeight="Bold" HorizontalAlignment="Left" Width="133" Height="27" Canvas.Left="54"><Run Language="en-gb" /></TextBlock>
+        </Canvas>
     </Grid>
 </UserControl>
