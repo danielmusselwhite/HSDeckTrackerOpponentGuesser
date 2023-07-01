@@ -328,7 +328,8 @@ namespace HDT_OpponentGuesser
                 }
 
                 // Sort _guessedDeckListCards by the cost of the cards (descending)
-                _guessedDeckListCards.Sort((x, y) => x.GetName().CompareTo(y.GetName()));
+                _guessedDeckListCards.Sort((x, y) => x.GetCost().CompareTo(y.GetCost()));
+                _guessedDeckListCards.Reverse();
 
                 // Display the deck name in the overlay
                 _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId, _guessedDeckListCards);

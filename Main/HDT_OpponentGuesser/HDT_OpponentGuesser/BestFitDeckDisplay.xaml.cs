@@ -394,14 +394,14 @@ namespace HDT_OpponentGuesser
                 VerticalAlignment = VerticalAlignment.Top,
                 FontSize = 10,
                 Foreground = Brushes.Black,
-                TextAlignment = TextAlignment.Left,
+                TextAlignment = TextAlignment.Center,
                 FontWeight = FontWeights.Bold,
                 Width = 177,
                 Height = 104
             };
 
             // remove any @ and $ symbols
-            cardDescriptionText = cardDescriptionText.Replace("@", "").Replace("$", "").Replace("{","");
+            cardDescriptionText = cardDescriptionText.Replace("@", "").Replace("$", "").Replace("{","").Replace("}","");
             // remove anything inside of <>
             CardDescription.Text = Regex.Replace(Regex.Replace(cardDescriptionText, @"<[^>]*>", String.Empty), @"\[[^]]*\]", String.Empty);
 

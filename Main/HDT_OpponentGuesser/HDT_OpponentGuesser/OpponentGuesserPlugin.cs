@@ -61,7 +61,7 @@ namespace HDT_OpponentGuesser
 
         public string Author => "Dmuss";
 
-        public Version Version => new Version(0, 2, 0);
+        public Version Version => new Version(1, 0, 0);
 
         public MenuItem MenuItem => null;
 
