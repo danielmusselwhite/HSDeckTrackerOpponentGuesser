@@ -35,7 +35,7 @@ namespace HDT_OpponentGuesser
         private BestFitDeckDisplay _bfdDisplay; // reference to the BestFitDeckDisplay class to display this information on the screen to the user
         private string _allMetaDecks; // string containing all meta decks from the API call
 
-        private double _minimumMatch = 1; // minimum % of cards that must match for a deck to be considered a possible match
+        private double _minimumMatch = 33; // minimum % of cards that must match for a deck to be considered a possible match
 
         // List of cards in that we are guessing opponent is playing
         private List<CardInfo> _guessedDeckListCards = new List<CardInfo>();
@@ -97,6 +97,7 @@ namespace HDT_OpponentGuesser
                 string health = "";
                 string attack = "";
                 string description = "";
+                string rarity = (string)card.rarity;
                 if (type != null)
                 {
                     if (type.ToUpper() == "SPELL" && card.mechanics != null && card.mechanics.Contains("Secret"))
@@ -115,7 +116,7 @@ namespace HDT_OpponentGuesser
                     // Log the card that doesn't have a type
                     Log.Info("Card with no type: " + name + " ("+dbfId+")");
                 }
-                _dbfIdToCardInfo.Add(dbfId, new Dictionary<string, string>() { { "cost", cost }, { "name", name }, { "health", health }, { "attack", attack }, { "description", description }, { "type", type } });
+                _dbfIdToCardInfo.Add(dbfId, new Dictionary<string, string>() { { "cost", cost }, { "name", name }, { "health", health }, { "attack", attack }, { "description", description }, { "type", type }, { "rarity", rarity } });
             }
 
             // testing indexing the hashtable
@@ -325,19 +326,6 @@ namespace HDT_OpponentGuesser
                 _guessedDeckListCards = new List<CardInfo>();
                 foreach (int cardDbfId in bestDeckDbfList)
                 {
-                    // Logging the info we are about to grab
-                    Log.Info("Card dbfId: " + cardDbfId);
-                    Log.Info("Card name: " + _dbfIdToCardInfo[cardDbfId]["name"]);
-                    Log.Info("Card cost: " + _dbfIdToCardInfo[cardDbfId]["cost"]);
-                    Log.Info("Card description: " + _dbfIdToCardInfo[cardDbfId]["description"]);
-                    Log.Info("Card type: " + _dbfIdToCardInfo[cardDbfId]["type"]);
-                    Log.Info("Card attack: " + _dbfIdToCardInfo[cardDbfId]["attack"]);
-                    Log.Info("Card health: " + _dbfIdToCardInfo[cardDbfId]["health"]);
-
-
-
-
-
                     // getting the cards info
                     string cardName = (string)_dbfIdToCardInfo[cardDbfId]["name"];
                     int cardCost = Int32.Parse((string) _dbfIdToCardInfo[cardDbfId]["cost"]);
@@ -345,10 +333,15 @@ namespace HDT_OpponentGuesser
                     string cardType = (string)_dbfIdToCardInfo[cardDbfId]["type"];
                     string cardAttack = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
                     string cardHealth = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
+                    string rarity = (string)_dbfIdToCardInfo[cardDbfId]["rarity"];
 
                     // Add the card to the list
-                    _guessedDeckListCards.Add(new CardInfo(cardDbfId, cardName, cardCost, cardHealth, cardAttack, cardDescription, cardType, false)); // false as not been played yet
+                    _guessedDeckListCards.Add(new CardInfo(cardDbfId, cardName, cardCost, cardHealth, cardAttack, cardDescription, cardType, rarity, false)); // false as not been played yet
                 }
+
+                // Sort _guessedDeckListCards by the cost of the cards (descending), with equal costs being sorted alphabetically (ascending)
+                _guessedDeckListCards.Sort((x, y) => x.GetName().CompareTo(y.GetName()));
+                _guessedDeckListCards.Sort((x, y) => y.GetCost().CompareTo(x.GetCost()));
 
                 // Display the deck name in the overlay
                 _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId, _guessedDeckListCards);

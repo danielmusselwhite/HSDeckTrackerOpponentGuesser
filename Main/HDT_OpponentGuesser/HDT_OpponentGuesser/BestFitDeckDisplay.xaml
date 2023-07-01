@@ -8,7 +8,7 @@
              >
     <Grid Margin="0,0,0,0">
 
-        <Canvas x:Name="canvasMain" HorizontalAlignment="Center" Width="300" Background="DimGray" Margin="0,782,0,0">
+        <Canvas x:Name="canvasMain" HorizontalAlignment="Center" Width="292" Background="DimGray" Margin="0,782,0,0">
             <TextBlock x:Name="winRateBlock" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="12" Foreground="White" TextAlignment="Center" FontWeight="Bold" HorizontalAlignment="Right" Width="79" Canvas.Left="214"><Run Language="en-gb" Text="yyy"/></TextBlock>
             <TextBlock x:Name="deckNameBlock" HorizontalAlignment="Left" TextWrapping="Wrap" Width="230" FontSize="14" Foreground="White" TextAlignment="Center" FontWeight="Bold" Height="21" VerticalAlignment="Top" Canvas.Left="32" Canvas.Top="30"><Run Language="en-gb" Text="zzzzzzzz"/></TextBlock>
             <TextBlock x:Name="matchPercentBlock" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center" Width="79" FontSize="12" Foreground="White" TextAlignment="Center" FontWeight="Bold"><Run Language="en-gb" Text="xxx"/></TextBlock>
@@ -16,7 +16,7 @@
         </Canvas>
 
         <!-- The Deck View Itself -->
-        <Canvas x:Name="canvasDeckView" HorizontalAlignment="Center" Height="782" VerticalAlignment="Top" Width="300" Background="DimGray"/>
+        <Canvas x:Name="canvasDeckView" HorizontalAlignment="Center" Height="580" VerticalAlignment="Bottom" Width="292" Background="DarkGray" Margin="0,0,0,51"/>
 
     </Grid>
 </UserControl>

@@ -107,7 +107,7 @@ namespace HDT_OpponentGuesser
                 {
                     Log.Info("Creating Card View For the Values of: " + card.GetName() + " " + card.GetCost() + " " + card.GetHealth() + " " + card.GetAttack() + " " + card.GetDescription() + " " + card.GetCardType() + " " + card.GetDbfId() + "");
                     // if not, add the card to cardViews
-                    cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), this.canvasDeckView));
+                    cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), this.canvasDeckView));
                 }
             }
 
@@ -116,6 +116,10 @@ namespace HDT_OpponentGuesser
             {
                 canvasDeckView.Children.Add(cardView);
             }
+
+            // Make the canvasDeckViews height fit its contents
+            canvasDeckView.Height = cardViews.Count * (CardView.height+CardView.spaceBetween)+2;
+
             #endregion
 
         }
@@ -189,12 +193,14 @@ namespace HDT_OpponentGuesser
         private string _description;
         private string _cardType;
         private int _dbfId;
+        private string _rarity;
         public static int cardNumber = 0;
         public static int height = 14;
+        public static int spaceBetween = 2;
         Canvas _parent;
 
 
-        public CardView(string name, int cost, string health, string attack, string description, string type, int dbfId, Canvas parent)
+        public CardView(string name, int cost, string health, string attack, string description, string type, int dbfId, string rarity, Canvas parent)
         {
             // store the variables
             _name = name;
@@ -206,6 +212,7 @@ namespace HDT_OpponentGuesser
             _cardType = type;
             _dbfId = dbfId;
             _parent = parent;
+            _rarity = rarity;
 
 
             // create a dict of Type:Color, where: Minion:Orange, Spell:Cyan, Secret:Blue, Weapon:Magenta, Location:Yellow
@@ -232,7 +239,7 @@ namespace HDT_OpponentGuesser
             this.Padding = new Thickness(0, 0, 0, 0);
 
             // setting the Vertical position of the cards in order based on cardNumber
-            this.SetValue(Canvas.BottomProperty, (double) cardNumber * (height+2));
+            this.SetValue(Canvas.BottomProperty, (double) cardNumber * (height+spaceBetween) + spaceBetween);
             this.SetValue(Canvas.LeftProperty, (double) (_parent.Width - this.Width) / 2);
 
 
@@ -258,7 +265,8 @@ namespace HDT_OpponentGuesser
 
         private string UpdateText()
         {
-            return _count+"x   |   " + _cost + " Mana   |   " + _name;
+            // ternary to also add a star symbol if rarity is "LEGENDARY"
+            return _count+"x   |   " + _cost + " Mana   |   " + _name + (_rarity == "LEGENDARY" ? " | ★" : ""); ;
         }
     }
 }

@@ -12,8 +12,6 @@
 ## TODO's - Core
 
 - FEATURE: On hovering over a card in the decklist, popup with detailed info on it
-- FEATURE: Make decklist canvas fit the height of its contents
-- FEATURE: Sort the cards in the decklist by mana cost
 ## TODO's - Maybes
 
 - Feature: Given we are detecting opponent's deck, may be interesting to collate the data to get in-depth W/L vs Deck Archetype not just vs Class
