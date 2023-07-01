@@ -399,8 +399,13 @@ namespace HDT_OpponentGuesser
                 Width = 177,
                 Height = 104
             };
-            // remove anything inside of <> and any instances of "[x]" from description
+
+            // remove any @ and $ symbols
+            cardDescriptionText = cardDescriptionText.Replace("@", "").Replace("$", "").Replace("{","");
+            // remove anything inside of <>
             CardDescription.Text = Regex.Replace(Regex.Replace(cardDescriptionText, @"<[^>]*>", String.Empty), @"\[[^]]*\]", String.Empty);
+
+
             Canvas.SetLeft(CardDescription, 5);
             Canvas.SetTop(CardDescription, 108);
             canvasCardDetails.Children.Add(CardDescription);
