@@ -28,12 +28,17 @@ namespace HDT_OpponentGuesser
         private string _class;
         private JToken _metaClassDecks;
         private bool _firstTurn;
-        private Dictionary<int, string> _dbfIdToName = new Dictionary<int, string>() { }; // hash table of card dbfId to card name for efficient lookup
+        // hashtable of card dbfId to a dict of strings containing the rest of the cards info
+        private Dictionary<int, Dictionary<string, string>> _dbfIdToCardInfo = new Dictionary<int, Dictionary<string, string>>() { };
+
+
         private BestFitDeckDisplay _bfdDisplay; // reference to the BestFitDeckDisplay class to display this information on the screen to the user
         private string _allMetaDecks; // string containing all meta decks from the API call
 
-        //TODO - possibly make this an option for user to set in the GUI
-        private double _minimumMatch = 10; // minimum % of cards that must match for a deck to be considered a possible match
+        private double _minimumMatch = 1; // minimum % of cards that must match for a deck to be considered a possible match
+
+        // List of cards in that we are guessing opponent is playing
+        private List<CardInfo> _guessedDeckListCards = new List<CardInfo>();
 
         // Creating constructor that takes in a reference to the BestFitDeckDisplay class
         public OpponentGuesser(BestFitDeckDisplay displayBestFitDeck)
@@ -85,11 +90,35 @@ namespace HDT_OpponentGuesser
 
             foreach (var card in jsonContent)
             {
-                _dbfIdToName.Add((int)card.dbfId, (string)card.name);
+                int dbfId = (int)card.dbfId;
+                string name = (string)card.name;
+                string cost = (string)card.cost;
+                string type = (string)card.type;
+                string health = "";
+                string attack = "";
+                string description = "";
+                if (type != null)
+                {
+                    if (type.ToUpper() == "SPELL" && card.mechanics != null && card.mechanics.Contains("Secret"))
+                        type = "SECRET";
+                    else if (type.ToUpper() == "MINION")
+                    {
+                        health = (string)card.health;
+                        attack = (string)card.attack;
+                    }
+                    if (card.text != null)
+                        description = (string)card.description;
+                    
+                }
+                else
+                {
+                    // Log the card that doesn't have a type
+                    Log.Info("Card with no type: " + name + " ("+dbfId+")");
+                }
+                _dbfIdToCardInfo.Add(dbfId, new Dictionary<string, string>() { { "cost", cost }, { "name", name }, { "health", health }, { "attack", attack }, { "description", description }, { "type", type } });
             }
 
             // testing indexing the hashtable
-            Log.Info("dbfId 91661: " + _dbfIdToName[91661]);
         }
 
 
@@ -247,14 +276,19 @@ namespace HDT_OpponentGuesser
                 }
                 Log.Info("Deck " + i + "(" + _metaClassDecks[i]["deck_id"] + ")" + " has a " + matchPercent + "% match with the cards played, and a " + winRate + "% winrate");
             }
+            #endregion
+
+            #region Updating UI for the best fit meta deck
+            // If we found a best fit deck...
             if (bestFitDeckIndex != -1)
             {
+                // Get the archetype_id and deck_id of the best fit deck
                 JToken bestFitDeck = _metaClassDecks[bestFitDeckIndex];
                 string archetypeId = bestFitDeck["archetype_id"].ToString();
                 string bestFitDeckId = bestFitDeck["deck_id"].ToString();
 
-                // API call toget name of deck with this archetype_id
 
+                // API call to get name of deck with this archetype_id
                 #region Getting the name of the Deck
                 #region Do an API call to get info on this decks archetype
                 // Create the URL
@@ -288,18 +322,36 @@ namespace HDT_OpponentGuesser
 
                 // iterate through each card in bestFitDeck and create a Card entity for it storing all them in a list
                 List<int> bestDeckDbfList = JsonConvert.DeserializeObject<List<int>>(bestFitDeck["deck_list"].ToString());
-                List<Card> bestDeckCardList = new List<Card>();
+                _guessedDeckListCards = new List<CardInfo>();
                 foreach (int cardDbfId in bestDeckDbfList)
                 {
-                    Log.Info("Card predicted to have: " + _dbfIdToName[cardDbfId]);
-                    // create a new card using the dbfId
+                    // Logging the info we are about to grab
+                    Log.Info("Card dbfId: " + cardDbfId);
+                    Log.Info("Card name: " + _dbfIdToCardInfo[cardDbfId]["name"]);
+                    Log.Info("Card cost: " + _dbfIdToCardInfo[cardDbfId]["cost"]);
+                    Log.Info("Card description: " + _dbfIdToCardInfo[cardDbfId]["description"]);
+                    Log.Info("Card type: " + _dbfIdToCardInfo[cardDbfId]["type"]);
+                    Log.Info("Card attack: " + _dbfIdToCardInfo[cardDbfId]["attack"]);
+                    Log.Info("Card health: " + _dbfIdToCardInfo[cardDbfId]["health"]);
 
-                    
 
+
+
+
+                    // getting the cards info
+                    string cardName = (string)_dbfIdToCardInfo[cardDbfId]["name"];
+                    int cardCost = Int32.Parse((string) _dbfIdToCardInfo[cardDbfId]["cost"]);
+                    string cardDescription = (string)_dbfIdToCardInfo[cardDbfId]["description"];
+                    string cardType = (string)_dbfIdToCardInfo[cardDbfId]["type"];
+                    string cardAttack = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
+                    string cardHealth = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
+
+                    // Add the card to the list
+                    _guessedDeckListCards.Add(new CardInfo(cardDbfId, cardName, cardCost, cardHealth, cardAttack, cardDescription, cardType, false)); // false as not been played yet
                 }
 
                 // Display the deck name in the overlay
-                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId);
+                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId, _guessedDeckListCards);
             }
             else
             {

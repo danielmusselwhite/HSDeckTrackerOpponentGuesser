@@ -4,21 +4,19 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HDT_OpponentGuesser"
-             mc:Ignorable="d" Width="293" Height="200"
+             mc:Ignorable="d" Width="293" Height="833"
              >
     <Grid Margin="0,0,0,0">
 
-        <Canvas x:Name="canvasMain" HorizontalAlignment="Center" Height="51" VerticalAlignment="Top" Width="293" Background="MediumPurple" Margin="0,149,0,0">
-            <TextBlock x:Name="winRateBlock" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="10" Foreground="White" TextAlignment="Center" FontWeight="Bold" HorizontalAlignment="Right" Width="79" Canvas.Left="214"><Run Language="en-gb" Text="yyy"/></TextBlock>
+        <Canvas x:Name="canvasMain" HorizontalAlignment="Center" Width="300" Background="DimGray" Margin="0,782,0,0">
+            <TextBlock x:Name="winRateBlock" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="12" Foreground="White" TextAlignment="Center" FontWeight="Bold" HorizontalAlignment="Right" Width="79" Canvas.Left="214"><Run Language="en-gb" Text="yyy"/></TextBlock>
             <TextBlock x:Name="deckNameBlock" HorizontalAlignment="Left" TextWrapping="Wrap" Width="230" FontSize="14" Foreground="White" TextAlignment="Center" FontWeight="Bold" Height="21" VerticalAlignment="Top" Canvas.Left="32" Canvas.Top="30"><Run Language="en-gb" Text="zzzzzzzz"/></TextBlock>
-            <TextBlock x:Name="matchPercentBlock" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center" Width="79" FontSize="10" Foreground="White" TextAlignment="Center" FontWeight="Bold"><Run Language="en-gb" Text="xxx"/></TextBlock>
-            <TextBlock x:Name="viewDeckButton" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Width="88" FontSize="14" Foreground="Black" TextAlignment="Center" FontWeight="Bold" Background="DarkGoldenrod" Canvas.Left="103"><Run Language="en-gb" Text="View Deck"/></TextBlock>
+            <TextBlock x:Name="matchPercentBlock" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Center" Width="79" FontSize="12" Foreground="White" TextAlignment="Center" FontWeight="Bold"><Run Language="en-gb" Text="xxx"/></TextBlock>
+            <TextBlock x:Name="viewDeckButton" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" Width="64" Foreground="Black" TextAlignment="Center" FontWeight="Bold" Background="SlateBlue" Canvas.Left="114"><Run Language="en-gb" Text="View Deck"/></TextBlock>
         </Canvas>
 
         <!-- The Deck View Itself -->
-        <Canvas x:Name="canvasDeckView" HorizontalAlignment="Center" Height="149" VerticalAlignment="Top" Width="149" Background="MediumSlateBlue"/>
-
-
+        <Canvas x:Name="canvasDeckView" HorizontalAlignment="Center" Height="782" VerticalAlignment="Top" Width="300" Background="DimGray"/>
 
     </Grid>
 </UserControl>

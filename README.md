@@ -11,9 +11,9 @@
 
 ## TODO's - Core
 
-- FEATURE: Make the predicted deck list appear on hover over the "view" button 
-- BUG: Gives Null reference errors if HDT is Started AFTER a game is already in progress (low priority fix as not common for this to be done outside of dev)
-
+- FEATURE: On hovering over a card in the decklist, popup with detailed info on it
+- FEATURE: Make decklist canvas fit the height of its contents
+- FEATURE: Sort the cards in the decklist by mana cost
 ## TODO's - Maybes
 
 - Feature: Given we are detecting opponent's deck, may be interesting to collate the data to get in-depth W/L vs Deck Archetype not just vs Class

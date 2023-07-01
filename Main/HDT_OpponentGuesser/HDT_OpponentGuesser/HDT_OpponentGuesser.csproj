@@ -87,6 +87,7 @@
     <Compile Include="BestFitDeckDisplay.xaml.cs">
       <DependentUpon>BestFitDeckDisplay.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CardInfo.cs" />
     <Compile Include="OpponentGuesser.cs" />
     <Compile Include="OpponentGuesserPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
