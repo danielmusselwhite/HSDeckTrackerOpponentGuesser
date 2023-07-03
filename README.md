@@ -19,6 +19,7 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
   - Magenta = Secret
   - Star next to name = Legendary
 - Hovering over a card will then display information on that card (e.g. name, cost, type, rarity, (attack and damage for minions), etc.)
+- This updates in real time, every time the opponent plays a card
 
 ## Installation instructions
 
