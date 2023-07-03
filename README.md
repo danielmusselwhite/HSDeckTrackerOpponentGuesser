@@ -22,11 +22,11 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
 
 ## Installation instructions
 
-0. Download the HDT_OpponentGuesser.dll from the latest release
-1. Copy HDT_OpponentGuesser.dll to %AppData%\HearthstoneDeckTracker\Plugins
-2. Copy the dependent Assemblies dll's (that do not already exist in HearthstoneDeckTracker) from Project resources to %AppData%\HearthstoneDeckTracker\ (eg C:\Users\USERNAME\AppData\Local\HearthstoneDeckTracker\app-1.20.10\)
-   1. Currently have none due to rearchitecting the project
-3. Restart HDT
+1. Download the HDT_OpponentGuesser.dll from the latest release
+2. Copy HDT_OpponentGuesser.dll to %AppData%\HearthstoneDeckTracker\Plugins
+3. Copy the dependent Assemblies dll's (that do not already exist in HearthstoneDeckTracker) from Project resources to %AppData%\HearthstoneDeckTracker\ (eg C:\Users\USERNAME\AppData\Local\HearthstoneDeckTracker\app-1.20.10\)
+   a. Currently have none due to rearchitecting the project
+4. Restart HDT
 
 ## Suggestions
 
@@ -35,3 +35,4 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
 ## Contributions
 
 - If you would like to contribute, please feel free to open a pull request on this repo
+- [Developer Docs](./Documents/DeveloperDocs.md)
