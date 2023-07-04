@@ -44,6 +44,7 @@ namespace HDT_OpponentGuesser
 
         public void Update(string deckName, double winRate = -1, double bestFitDeckMatchPercent = -1, string deckId = null, List<CardInfo> guessedDeckList=null)
         {
+            Log.Info("Updating the BestFitDeckDisplay");
             _guessedDeckList = guessedDeckList;
 
             // Used to generate link to deck if user clicks on button
@@ -51,14 +52,17 @@ namespace HDT_OpponentGuesser
 
             if (deckName != null && winRate != -1 && bestFitDeckMatchPercent != -1 && deckId != null)
             {
+                Log.Info("Updating the BestFitDeckDisplay with a match");
                 this.deckNameBlock.Text = deckName + " (" + deckId.Substring(0, 4) + ")"; // including first 4 characters of deckId to differentiate between decks with same name
                 this.winRateBlock.Text = ((int)Math.Round((double)winRate)).ToString() + "% WR";
                 this.matchPercentBlock.Text = ((int)Math.Round((double)bestFitDeckMatchPercent)).ToString() + "% Match";
                 this.viewDeckButton.Visibility = Visibility.Visible;
                 UpdateDeckCardViews();
             }
+            // If no match, display "No Matches Above _minimumMatch%"
             else
             {
+                Log.Info("Updating the BestFitDeckDisplay with no match");
                 this.deckNameBlock.Text = "No Matches Above " + _minimumMatch + "%";
                 this.winRateBlock.Text = "";
                 this.matchPercentBlock.Text = "";
@@ -87,6 +91,7 @@ namespace HDT_OpponentGuesser
 
         private void UpdateDeckCardViews()
         {
+            Log.Info("Updating the Deck View with List of CardViews");
             #region Populating canvasDeckView with the cards in the deck
             // Destroy all contents from canvasDeckView (if any)
             canvasDeckView.Children.Clear();
@@ -193,243 +198,8 @@ namespace HDT_OpponentGuesser
             System.Diagnostics.Process.Start(url);
         }
 
-        private void UpdateDeckId(string deckId)
-        {
-            _deckId = deckId;
-        }
-
     }
 
 
-    // Class to represent cards view in the decklist; taking in on creation: count, name, cost, health, attack, description
-    public class CardView : TextBlock
-    {
-        private string _name ;
-        private int _cost;
-        private string _health;
-        private string _attack;
-        private int _count;
-        private string _description;
-        private string _cardType;
-        private int _dbfId;
-        private string _rarity;
-        public static int cardNumber = 0;
-        public static int height = 14;
-        public static int spaceBetween = 2;
-        Canvas _parent;
-
-
-        public CardView(string name, int cost, string health, string attack, string description, string type, int dbfId, string rarity, Canvas parent)
-        {
-            // store the variables
-            _name = name;
-            _cost = cost;
-            _health = health;
-            _attack = attack;
-            _description = description;
-            _count = 1;
-            _cardType = type;
-            _dbfId = dbfId;
-            _parent = parent;
-            _rarity = rarity;
-
-
-            // create a dict of Type:Color, where: Minion:Orange, Spell:Blue, Secret:Magenta, Weapon:Magenta, Location:Yellow
-            Dictionary<string, SolidColorBrush> typeColorDict = new Dictionary<string, SolidColorBrush>();
-            typeColorDict.Add("MINION", Brushes.Maroon);
-            typeColorDict.Add("SPELL", Brushes.DarkBlue);
-            typeColorDict.Add("SECRET", Brushes.DarkMagenta);
-            typeColorDict.Add("WEAPON", Brushes.DarkGoldenrod);
-            typeColorDict.Add("LOCATION", Brushes.DarkGreen);
-
-            // create a new textblock to display the cost, name, and count inside of canvasDeckView
-            this.Name = "deckCard" + cardNumber;
-            this.Text = UpdateText();
-            this.FontSize = 12;
-            this.Foreground = Brushes.White;
-            this.Background = typeColorDict[type];
-            this.FontWeight = FontWeights.Bold;
-            this.Height = height;
-            this.Width = 280;
-            this.TextAlignment = TextAlignment.Left;
-            this.TextWrapping = TextWrapping.Wrap;
-            this.VerticalAlignment = VerticalAlignment.Top;
-            this.Margin = new Thickness(0, 0, 0, 0);
-            this.Padding = new Thickness(0, 0, 0, 0);
-
-            // setting the Vertical position of the cards in order based on cardNumber
-            this.SetValue(Canvas.BottomProperty, (double) cardNumber * (height+spaceBetween) + spaceBetween);
-            this.SetValue(Canvas.LeftProperty, (double) (_parent.Width - this.Width) / 2);
-
-
-            cardNumber++;
-
-        }
-
-        public static void ResetCounter()
-        {
-            cardNumber = 0;
-        }
-
-        public int GetDbfId()
-        {
-            return _dbfId;
-        }
-
-        public void IncrementCount()
-        {
-            _count++;
-            this.Text = UpdateText();
-        }
-
-        private string UpdateText()
-        {
-            // ternary to also add a star symbol if rarity is "LEGENDARY"
-            return _count+"x   |   " + _cost + " Mana   |   " + _name + (_rarity == "LEGENDARY" ? " ★" : "");
-        }
-
-        public void ShowCardDetails(Canvas canvas)
-        {
-            // clear the canvas
-            canvas.Children.Clear();
-
-            CardDetailsCanvasPopulator.populateCardDetails(canvas, _name, _cost, _health, _attack, _description, _cardType, _rarity, this.Background);
-        }
+    
     }
-    public static class CardDetailsCanvasPopulator
-    {
-        public static void populateCardDetails(Canvas canvasCardDetails, string cardNameText, int cardManaValue, string cardHealthText,
-        string cardAttackText, string cardDescriptionText, string cardTypeText, string rarity, Brush typeColor)
-        {
-            Dictionary<string, SolidColorBrush> typeColorDict = new Dictionary<string, SolidColorBrush>();
-            typeColorDict.Add("MINION", Brushes.RosyBrown);
-            typeColorDict.Add("SPELL", Brushes.PaleTurquoise);
-            typeColorDict.Add("SECRET", Brushes.LightPink);
-            typeColorDict.Add("WEAPON", Brushes.Beige);
-            typeColorDict.Add("LOCATION", Brushes.DarkSeaGreen);
-
-            canvasCardDetails.Name = "canvasCardDetails";
-            canvasCardDetails.Background = typeColorDict[cardTypeText];
-            canvasCardDetails.Margin = new Thickness(479, 432, 125, 146);
-
-            // Create and configure the text blocks
-            var CardName = new TextBlock
-            {
-                Name = "cardName",
-                TextWrapping = TextWrapping.Wrap,
-                VerticalAlignment = VerticalAlignment.Center,
-                FontSize = 14,
-                Foreground = Brushes.Black,
-                TextAlignment = TextAlignment.Center,
-                FontWeight = FontWeights.Bold,
-                Width = 187
-            };
-            CardName.Text = cardNameText;
-            Canvas.SetLeft(CardName, 0);
-            Canvas.SetTop(CardName, 33);
-            canvasCardDetails.Children.Add(CardName);
-
-            var CardMana = new TextBlock
-            {
-                Name = "cardMana",
-                TextWrapping = TextWrapping.Wrap,
-                VerticalAlignment = VerticalAlignment.Center,
-                FontSize = 18,
-                Foreground = Brushes.White,
-                Background = Brushes.DarkCyan,
-                TextAlignment = TextAlignment.Center,
-                FontWeight = FontWeights.Bold,
-                Width = 57,
-                Height = 27
-            };
-            CardMana.Text = cardManaValue.ToString()+ " 💎";
-            Canvas.SetLeft(CardMana, 0);
-            Canvas.SetTop(CardMana, 0);
-            canvasCardDetails.Children.Add(CardMana);
-
-            // if type is minion, show health and attack
-            if (cardTypeText == "MINION")
-            {
-                var CardHealth = new TextBlock
-                {
-                    Name = "cardHealth",
-                    TextWrapping = TextWrapping.Wrap,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    FontSize = 18,
-                    Foreground = Brushes.White,
-                    Background = Brushes.DarkRed,
-                    TextAlignment = TextAlignment.Center,
-                    FontWeight = FontWeights.Bold,
-                    Width = 93,
-                    Height = 27
-                };
-                CardHealth.Text = cardHealthText+ " ♡";
-                Canvas.SetLeft(CardHealth, 94);
-                Canvas.SetTop(CardHealth, 228);
-                canvasCardDetails.Children.Add(CardHealth);
-
-                var CardAttack = new TextBlock
-                {
-                    Name = "cardAttack",
-                    TextWrapping = TextWrapping.Wrap,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    FontSize = 18,
-                    Foreground = Brushes.White,
-                    Background = Brushes.DarkGoldenrod,
-                    TextAlignment = TextAlignment.Center,
-                    FontWeight = FontWeights.Bold,
-                    Width = 93,
-                    Height = 27
-                };
-                CardAttack.Text = cardAttackText+ " ⚔";
-                Canvas.SetLeft(CardAttack, 0);
-                Canvas.SetTop(CardAttack, 228);
-                canvasCardDetails.Children.Add(CardAttack);
-            }
-
-            var CardDescription = new TextBlock
-            {
-                Name = "cardDescription",
-                TextWrapping = TextWrapping.Wrap,
-                VerticalAlignment = VerticalAlignment.Top,
-                FontSize = 10,
-                Foreground = Brushes.Black,
-                TextAlignment = TextAlignment.Center,
-                FontWeight = FontWeights.Bold,
-                Width = 177,
-                Height = 104
-            };
-
-            // remove any @ and $ symbols
-            cardDescriptionText = cardDescriptionText.Replace("@", "").Replace("$", "").Replace("{","").Replace("}","");
-            // remove anything inside of <>
-            CardDescription.Text = Regex.Replace(Regex.Replace(cardDescriptionText, @"<[^>]*>", String.Empty), @"\[[^]]*\]", String.Empty);
-
-
-            Canvas.SetLeft(CardDescription, 5);
-            Canvas.SetTop(CardDescription, 108);
-            canvasCardDetails.Children.Add(CardDescription);
-
-            var CardType = new TextBlock
-            {
-                Name = "cardType",
-                TextWrapping = TextWrapping.Wrap,
-                VerticalAlignment = VerticalAlignment.Center,
-                FontSize = 16,
-                Foreground = Brushes.White,
-                Background = typeColor,
-                TextAlignment = TextAlignment.Right,
-                FontWeight = FontWeights.Bold,
-                Width = 133,
-                Height = 27
-            };
-            CardType.Text = (rarity == "LEGENDARY" ? "★ | " : "") + cardTypeText;
-            Canvas.SetLeft(CardType, 54);
-            Canvas.SetTop(CardType, 0);
-            canvasCardDetails.Children.Add(CardType);
-
-            // Add the text blocks to the canvas
-            canvasCardDetails.Visibility = Visibility.Visible;
-        }
-    }
-}

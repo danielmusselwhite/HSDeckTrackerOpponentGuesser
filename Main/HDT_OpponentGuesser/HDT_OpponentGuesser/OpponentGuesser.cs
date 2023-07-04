@@ -28,14 +28,13 @@ namespace HDT_OpponentGuesser
         private string _class;
         private JToken _metaClassDecks;
         private bool _firstTurn;
-        // hashtable of card dbfId to a dict of strings containing the rest of the cards info
-        private Dictionary<int, Dictionary<string, string>> _dbfIdToCardInfo = new Dictionary<int, Dictionary<string, string>>() { };
-
+        // Dictionary of card dbfId to a dict of strings containing the rest of the cards info
+        private Dictionary<int, Dictionary<string, string>> _dbfIdToCardInfo;
 
         private BestFitDeckDisplay _bfdDisplay; // reference to the BestFitDeckDisplay class to display this information on the screen to the user
         private string _allMetaDecks; // string containing all meta decks from the API call
 
-        private double _minimumMatch = 33; // minimum % of cards that must match for a deck to be considered a possible match
+        private double _minimumMatch = 50; // minimum % of cards that must match for a deck to be considered a possible match
 
         // List of cards in that we are guessing opponent is playing
         private List<CardInfo> _guessedDeckListCards = new List<CardInfo>();
@@ -43,16 +42,18 @@ namespace HDT_OpponentGuesser
         // Creating constructor that takes in a reference to the BestFitDeckDisplay class
         public OpponentGuesser(BestFitDeckDisplay displayBestFitDeck)
         {
+            // Getting reference to the game
             _game = Hearthstone_Deck_Tracker.Core.Game;
 
-            GetCardHashTable();
-
+            // Getting reference to the card Dictionary
+            _dbfIdToCardInfo = CardInfoDictionary.GetCardDictionary();
+            
+            // Getting reference to the BestFitDeckDisplay (the actual GUI) class
             _bfdDisplay = displayBestFitDeck;
             _bfdDisplay.SetMinimumMatch(_minimumMatch);
             if (Config.Instance.HideInMenu && _game.IsInMenu)
-            {
                 _bfdDisplay.Hide();
-            }
+            
 
             #region Do an API call to get a list of all meta decks
             // Create the URL
@@ -73,49 +74,6 @@ namespace HDT_OpponentGuesser
             content.Dispose();
             client.Dispose();
             #endregion
-        }
-
-
-        // Creating hashtable of all cards in game for efficient lookup
-        private void GetCardHashTable()
-        {
-            // Making API call to get info on all cards via api
-            var httpClient = new HttpClient();
-            var response = httpClient.GetAsync("https://api.hearthstonejson.com/v1/latest/enUS/cards.json").Result;
-            HttpContent content = response.Content;
-            string stringContent = content.ReadAsStringAsync().Result;
-
-            // Convert the string content to a JSON object
-            dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
-
-            foreach (var card in jsonContent)
-            {
-                int dbfId = (int)card.dbfId;
-                string name = (string)card.name;
-                string cost = (string)card.cost;
-                string type = (string)card.type;
-                string health = "";
-                string attack = "";
-                string description = "";
-                string rarity = (string)card.rarity;
-                if (type != null)
-                {
-                    if (type.ToUpper() == "SPELL" && card.mechanics != null && card.mechanics.ToString().Contains("SECRET"))
-                        type = "SECRET";
-                    else if (type.ToUpper() == "MINION")
-                    {
-                        health = (string)card.health;
-                        attack = (string)card.attack;
-                    }
-                }
-                if (card.text != null)
-                {
-                    description = (string)card.text;
-                }
-                _dbfIdToCardInfo.Add(dbfId, new Dictionary<string, string>() { { "cost", cost }, { "name", name }, { "health", health }, { "attack", attack }, { "description", description }, { "type", type }, { "rarity", rarity } });
-            }
-
-            // testing indexing the hashtable
         }
 
 
@@ -220,7 +178,9 @@ namespace HDT_OpponentGuesser
             {
                 deckPlayedCardsDbfId.Add(cardPlayed.DbfId);
             }
-            Log.Info("deckPlayedCardsDbfId: " + deckPlayedCardsDbfId.ToString());
+            // Log the contents of deckPlayedCardsDbfId
+            string deckPlayedCardsDbfIdString = string.Join(", ", deckPlayedCardsDbfId);
+
 
             // Loop through _metaClassDecks and find which has the most cards in common with deckPlayedCards
             int bestFitDeckIndex = -1;
@@ -323,6 +283,7 @@ namespace HDT_OpponentGuesser
                     string cardHealth = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
                     string rarity = (string)_dbfIdToCardInfo[cardDbfId]["rarity"];
 
+                    Log.Info("Adding card " + cardName + " to the list of cards in the guessed Deck List");
                     // Add the card to the list
                     _guessedDeckListCards.Add(new CardInfo(cardDbfId, cardName, cardCost, cardHealth, cardAttack, cardDescription, cardType, rarity, false)); // false as not been played yet
                 }
@@ -331,6 +292,7 @@ namespace HDT_OpponentGuesser
                 _guessedDeckListCards.Sort((x, y) => x.GetCost().CompareTo(y.GetCost()));
                 _guessedDeckListCards.Reverse();
 
+                Log.Info("calling _bfdDisplay.Update()");
                 // Display the deck name in the overlay
                 _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId, _guessedDeckListCards);
             }

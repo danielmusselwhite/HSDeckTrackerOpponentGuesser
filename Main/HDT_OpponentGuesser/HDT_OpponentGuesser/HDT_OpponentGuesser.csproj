@@ -87,10 +87,13 @@
     <Compile Include="BestFitDeckDisplay.xaml.cs">
       <DependentUpon>BestFitDeckDisplay.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CardDetailsCanvasPopulator.cs" />
     <Compile Include="CardInfo.cs" />
+    <Compile Include="CardView.cs" />
     <Compile Include="OpponentGuesser.cs" />
     <Compile Include="OpponentGuesserPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CardInfoHashTable.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
