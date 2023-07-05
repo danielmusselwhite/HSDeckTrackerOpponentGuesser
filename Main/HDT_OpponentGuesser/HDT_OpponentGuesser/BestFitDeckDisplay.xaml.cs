@@ -116,7 +116,7 @@ namespace HDT_OpponentGuesser
                     // if we want to viewPlayedCards, show the played cards and the predicted cards (with their count being what is left)
                     if (_viewPlayedCards)
                     {
-                        if (alreadyPlayedCount > 0 && alreadyPlayedCount < predictedCount)
+                        if (alreadyPlayedCount > 0 && alreadyPlayedCount <= predictedCount)
                         {
                             // Add grayed out card view showing played count
                             cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), alreadyPlayedCount, true, this.canvasDeckView));

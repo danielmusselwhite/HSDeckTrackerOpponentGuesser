@@ -261,6 +261,12 @@ namespace HDT_OpponentGuesser
 
                 // Get the name from this JSON object
                 string bestDeckName = jsonContent["name"];
+
+                // if there is no name, then use the class name instead
+                if (bestDeckName == null)
+                {
+                    bestDeckName = _opponent.Class.ToString()+" deck";
+                }
                 #endregion
                 #endregion
 

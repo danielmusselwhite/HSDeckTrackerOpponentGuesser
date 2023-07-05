@@ -54,14 +54,14 @@ namespace HDT_OpponentGuesser
                 typeColorDict.Add("WEAPON", Brushes.DarkGoldenrod);
                 typeColorDict.Add("LOCATION", Brushes.DarkGreen);
             }
-            // Played cards are darker
+            // Played cards are black (looked too cluttered with different colours for each type)
             else
             {
-                typeColorDict.Add("MINION", new SolidColorBrush(Color.FromRgb(33, 10, 10)));
-                typeColorDict.Add("SPELL", new SolidColorBrush(Color.FromRgb(10, 10, 33)));
-                typeColorDict.Add("SECRET", new SolidColorBrush(Color.FromRgb(33, 10, 33)));
-                typeColorDict.Add("WEAPON", new SolidColorBrush(Color.FromRgb(33, 33, 10)));
-                typeColorDict.Add("LOCATION", new SolidColorBrush(Color.FromRgb(10, 33, 10)));
+                typeColorDict.Add("MINION", Brushes.Black);
+                typeColorDict.Add("SPELL", Brushes.Black);
+                typeColorDict.Add("SECRET", Brushes.Black);
+                typeColorDict.Add("WEAPON", Brushes.Black);
+                typeColorDict.Add("LOCATION", Brushes.Black);
             }
 
             // create a new textblock to display the cost, name, and count inside of canvasDeckView
