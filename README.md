@@ -4,9 +4,13 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
 
 ## Explanation of the plugin
 
-![InGameView](./Documents/Images/InGameView.png)
+<!-- Table with 1 row with 2 columns -->
+| ![InGameView](./Documents/Images/InGameView_F.png) | ![InGameView](./Documents/Images/InGameView_T.png) |
+| Played Cards Toggle Off | Played Cards Toggle On |
 
-- Screenshot above shows the plugin in action
+
+
+- Screenshots above shows the plugin in action
 - A grey box appears in the bottom left of the screen
   - If no Meta Deck from HSReplay matches the opponents played cards over n%.
   - If a Meta Deck has been found, it will show the name of the deck (and the first few characters of its ID to differnetiate decks with the same name), winrate of the deck, and the decks % match.
@@ -20,6 +24,9 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
   - Star next to name = Legendary
 - Hovering over a card will then display information on that card (e.g. name, cost, type, rarity, (attack and damage for minions), etc.)
 - This updates in real time, every time the opponent plays a card
+- Toggleable button for viewing the played cards vs cards remaining:
+  - When False (Red) - shows the complete deck list we are predicting opponent is using
+  - When True (Green) - modifies this decklist to add in a darker colour the cards opponents have played that exist in the decklist + reducing the count of that card
 
 ## Installation instructions
 

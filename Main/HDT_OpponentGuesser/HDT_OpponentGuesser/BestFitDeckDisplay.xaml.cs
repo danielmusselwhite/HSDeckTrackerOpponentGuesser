@@ -30,6 +30,7 @@ namespace HDT_OpponentGuesser
         private DateTime _timeAFterClick = DateTime.Now;
         private List<CardInfo> _guessedDeckList = null;
         private List<CardInfo> _playedCardList = null;
+        private bool _viewPlayedCards = true;
 
         public BestFitDeckDisplay()
         {
@@ -110,19 +111,28 @@ namespace HDT_OpponentGuesser
                     int predictedCount = GetNumberOfCard(_guessedDeckList, card.GetDbfId());
                     int alreadyPlayedCount = GetNumberOfCard(_playedCardList, card.GetDbfId());
 
-                    
-                    if (alreadyPlayedCount > 0 && alreadyPlayedCount < predictedCount)
+                    // if we want to viewPlayedCards, show the played cards and the predicted cards (with their count being what is left)
+                    if (_viewPlayedCards)
                     {
-                        // Add grayed out card view showing played count
-                        cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), alreadyPlayedCount, true, this.canvasDeckView));
+                        if (alreadyPlayedCount > 0 && alreadyPlayedCount < predictedCount)
+                        {
+                            // Add grayed out card view showing played count
+                            cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), alreadyPlayedCount, true, this.canvasDeckView));
+                        }
+                        if (alreadyPlayedCount < predictedCount)
+                        {
+                            // Add default color card view showing predicted count - played count
+                            int remainingCount = predictedCount - alreadyPlayedCount;
+                            cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), remainingCount, false, this.canvasDeckView));
+                        }
+                    }
+                    // else, just show the predicted cards
+                    else
+                    {
+                        // Add default color card view showing predicted count
+                        cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), predictedCount, false, this.canvasDeckView));
                     }
 
-                    if (alreadyPlayedCount < predictedCount)
-                    {
-                        // Add default color card view showing predicted count - played count
-                        int remainingCount = predictedCount - alreadyPlayedCount;
-                        cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), remainingCount, false, this.canvasDeckView));
-                    }
                 }
 
             }
@@ -169,9 +179,9 @@ namespace HDT_OpponentGuesser
                     canvasDeckView.Visibility = Visibility.Visible;
 
                     //detect if player has clicked on the button; first confirm users mouse if over the button
-                    if (IsMouseOverElement(this.viewDeckButton) && DateTime.Now > _timeAFterClick)
+                    if (DateTime.Now > _timeAFterClick && IsMouseOverElement(this.viewDeckButton))
                     {
-                        _timeAFterClick = DateTime.Now.AddSeconds(3);
+                        _timeAFterClick = DateTime.Now.AddSeconds(0.5);
                         new User32.MouseInput().LmbDown += ViewButtonClicked; // then, if LmbDown event is triggered, call ViewButtonClicked
                     }
 
@@ -201,6 +211,21 @@ namespace HDT_OpponentGuesser
                     canvasDeckView.Visibility = Visibility.Hidden;
                     canvasCardDetails.Visibility = Visibility.Hidden;
                 }
+
+                // handle the toggle button for showing played cards
+                if (IsMouseOverElement(this.showPlayedCardsButton))
+                {
+                    this.showPlayedCardsButton.Background = _viewPlayedCards ? Brushes.LightGreen : Brushes.LightSalmon;
+                    if (DateTime.Now > _timeAFterClick)
+                    {
+                        _timeAFterClick = DateTime.Now.AddSeconds(0.5);
+                        new User32.MouseInput().LmbDown += ShowPlayedCardsClicked; // then, if LmbDown event is triggered, call ShowPlayedCardsClicked
+                    }
+                }
+                else
+                {
+                    showPlayedCardsButton.Background = _viewPlayedCards ? Brushes.Green : Brushes.Red;
+                }
             }
         }
 
@@ -221,6 +246,14 @@ namespace HDT_OpponentGuesser
             string url = $"https://hsreplay.net/decks/{_deckId}/#rankRange=GOLD&gameType=RANKED_STANDARD";
             Log.Debug(url);
             System.Diagnostics.Process.Start(url);
+        }
+
+        private void ShowPlayedCardsClicked(object sender, EventArgs eventArgs)
+        {
+            Log.Info("ShowPlayedCardsClicked");
+            _viewPlayedCards = !_viewPlayedCards;
+
+            UpdateDeckCardViews();
         }
 
     }
