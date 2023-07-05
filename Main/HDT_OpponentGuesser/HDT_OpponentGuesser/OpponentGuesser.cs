@@ -173,7 +173,9 @@ namespace HDT_OpponentGuesser
             List<int> deckPlayedCardsDbfId = new List<int>();
             foreach (Card cardPlayed in deckPlayedCards)
             {
-                deckPlayedCardsDbfId.Add(cardPlayed.DbfId);
+                // for the count of the card, add the dbfId to the list
+                for (int i = 0; i < cardPlayed.Count; i++)
+                    deckPlayedCardsDbfId.Add(cardPlayed.DbfId);
             }
             // Log the contents of deckPlayedCardsDbfId
             string deckPlayedCardsDbfIdString = string.Join(", ", deckPlayedCardsDbfId);
@@ -316,8 +318,6 @@ namespace HDT_OpponentGuesser
                 string cardAttack = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
                 string cardHealth = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
                 string rarity = (string)_dbfIdToCardInfo[cardDbfId]["rarity"];
-
-                Log.Info("Adding card " + cardName);
                 // Add the card to the list
                 deck.Add(new CardInfo(cardDbfId, cardName, cardCost, cardHealth, cardAttack, cardDescription, cardType, rarity, false)); // false as not been played yet
             }
