@@ -23,6 +23,7 @@ namespace HDT_OpponentGuesser
             typeColorDict.Add("WEAPON", Brushes.Beige);
             typeColorDict.Add("LOCATION", Brushes.DarkSeaGreen);
 
+            // Create and configure the canvas
             canvasCardDetails.Name = "canvasCardDetails";
             canvasCardDetails.Background = typeColorDict[cardTypeText];
             canvasCardDetails.Margin = new Thickness(479, 432, 125, 146);

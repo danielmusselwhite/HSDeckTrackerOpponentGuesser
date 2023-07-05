@@ -29,6 +29,7 @@ namespace HDT_OpponentGuesser
         private double _minimumMatch;
         private DateTime _timeAFterClick = DateTime.Now;
         private List<CardInfo> _guessedDeckList = null;
+        private List<CardInfo> _playedCardList = null;
 
         public BestFitDeckDisplay()
         {
@@ -42,10 +43,11 @@ namespace HDT_OpponentGuesser
             _minimumMatch = minimumMatch;
         }
 
-        public void Update(string deckName, double winRate = -1, double bestFitDeckMatchPercent = -1, string deckId = null, List<CardInfo> guessedDeckList=null)
+        public void Update(string deckName, double winRate = -1, double bestFitDeckMatchPercent = -1, string deckId = null, List<CardInfo> guessedDeckList=null, List<CardInfo> playedCardList = null)
         {
             Log.Info("Updating the BestFitDeckDisplay");
             _guessedDeckList = guessedDeckList;
+            _playedCardList = playedCardList;
 
             // Used to generate link to deck if user clicks on button
             this._deckId = deckId;
@@ -101,18 +103,28 @@ namespace HDT_OpponentGuesser
             List<CardView> cardViews = new List<CardView>();
             foreach (CardInfo card in _guessedDeckList)
             {
-
-                // check if cardViews already has a card with the same dbfID
-                if (cardViews.Any(x => x.GetDbfId() == card.GetDbfId()))
+                // if card with this dbfId does not yet exist in cardViews but it does exist in _guessedDeckList (as we don't want to show cards that do not fit the deck)
+                if (!cardViews.Any(x => x.GetDbfId() == card.GetDbfId()) && _guessedDeckList.Any(y => y.GetDbfId() == card.GetDbfId()))
                 {
-                    // if so, increment the count of that card
-                    cardViews.Find(x => x.GetDbfId() == card.GetDbfId()).IncrementCount();
+                    // get number of times card appeared in the predicted deck vs number of times it has been played
+                    int predictedCount = GetNumberOfCard(_guessedDeckList, card.GetDbfId());
+                    int alreadyPlayedCount = GetNumberOfCard(_playedCardList, card.GetDbfId());
 
-                }// if not, add the card to cardViews
-                else
-                {
-                    cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), this.canvasDeckView));
+                    
+                    if (alreadyPlayedCount > 0 && alreadyPlayedCount < predictedCount)
+                    {
+                        // Add grayed out card view showing played count
+                        cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), alreadyPlayedCount, true, this.canvasDeckView));
+                    }
+
+                    if (alreadyPlayedCount < predictedCount)
+                    {
+                        // Add default color card view showing predicted count - played count
+                        int remainingCount = predictedCount - alreadyPlayedCount;
+                        cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), remainingCount, false, this.canvasDeckView));
+                    }
                 }
+
             }
 
             // Add each cardView to the canvasDeckView
@@ -128,6 +140,19 @@ namespace HDT_OpponentGuesser
 
         }
 
+        // function to get number of CardInfo in List<CardInfo> that have the same dbfId
+        private int GetNumberOfCard(List<CardInfo> cardInfoList, int dbfId)
+        {
+            int count = 0;
+            foreach (CardInfo cardInfo in cardInfoList)
+            {
+                if (cardInfo.GetDbfId() == dbfId)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
 
 
         //Function to check if the mouse is over the controls various components, and if so view the deck

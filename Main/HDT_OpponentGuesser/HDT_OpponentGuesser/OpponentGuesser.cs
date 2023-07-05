@@ -36,9 +36,6 @@ namespace HDT_OpponentGuesser
 
         private double _minimumMatch = 50; // minimum % of cards that must match for a deck to be considered a possible match
 
-        // List of cards in that we are guessing opponent is playing
-        private List<CardInfo> _guessedDeckListCards = new List<CardInfo>();
-
         // Creating constructor that takes in a reference to the BestFitDeckDisplay class
         public OpponentGuesser(BestFitDeckDisplay displayBestFitDeck)
         {
@@ -270,31 +267,23 @@ namespace HDT_OpponentGuesser
                 Log.Info("Best fit deck is archetype " + bestDeckName + " at index " + bestFitDeckIndex + " (" + bestFitDeckId + ") with a " + bestFitDeckMatchPercent + "% match (greater than minimum of " + _minimumMatch + "%) and a " + bestWinRate + "% winrate");
 
                 // iterate through each card in bestFitDeck and create a Card entity for it storing all them in a list
+                Log.Info("Creating a List<CardInfo> for the guessed deck");
                 List<int> bestDeckDbfList = JsonConvert.DeserializeObject<List<int>>(bestFitDeck["deck_list"].ToString());
-                _guessedDeckListCards = new List<CardInfo>();
-                foreach (int cardDbfId in bestDeckDbfList)
-                {
-                    // getting the cards info
-                    string cardName = (string)_dbfIdToCardInfo[cardDbfId]["name"];
-                    int cardCost = Int32.Parse((string) _dbfIdToCardInfo[cardDbfId]["cost"]);
-                    string cardDescription = (string)_dbfIdToCardInfo[cardDbfId]["description"];
-                    string cardType = (string)_dbfIdToCardInfo[cardDbfId]["type"];
-                    string cardAttack = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
-                    string cardHealth = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
-                    string rarity = (string)_dbfIdToCardInfo[cardDbfId]["rarity"];
+                List<CardInfo> guessedDeckListCardInfo = CreateCardInfoDeckFromDBF(bestDeckDbfList);
+                
+                //making deckPlayedCards into a List<CardInfo>
+                Log.Info("Creating a List<CardInfo> for the playedCards");
+                List<CardInfo> deckPlayedCardsCardInfo = CreateCardInfoDeckFromDBF(deckPlayedCardsDbfId);
 
-                    Log.Info("Adding card " + cardName + " to the list of cards in the guessed Deck List");
-                    // Add the card to the list
-                    _guessedDeckListCards.Add(new CardInfo(cardDbfId, cardName, cardCost, cardHealth, cardAttack, cardDescription, cardType, rarity, false)); // false as not been played yet
-                }
-
-                // Sort _guessedDeckListCards by the cost of the cards (descending)
-                _guessedDeckListCards.Sort((x, y) => x.GetCost().CompareTo(y.GetCost()));
-                _guessedDeckListCards.Reverse();
+                // Sorting the decks by the cost of the cards (descending)
+                guessedDeckListCardInfo.Sort((x, y) => x.GetCost().CompareTo(y.GetCost()));
+                guessedDeckListCardInfo.Reverse();
+                deckPlayedCardsCardInfo.Sort((x, y) => x.GetCost().CompareTo(y.GetCost()));
+                deckPlayedCardsCardInfo.Reverse();
 
                 Log.Info("calling _bfdDisplay.Update()");
                 // Display the deck name in the overlay
-                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId, _guessedDeckListCards);
+                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId, guessedDeckListCardInfo, deckPlayedCardsCardInfo);
             }
             else
             {
@@ -306,6 +295,27 @@ namespace HDT_OpponentGuesser
             #endregion
         }
 
+        private List<CardInfo> CreateCardInfoDeckFromDBF(List<int> dbfIds)
+        {
+            List<CardInfo> deck = new List<CardInfo>();
+            foreach (int cardDbfId in dbfIds)
+            {
+                // getting the cards info
+                string cardName = (string)_dbfIdToCardInfo[cardDbfId]["name"];
+                int cardCost = Int32.Parse((string)_dbfIdToCardInfo[cardDbfId]["cost"]);
+                string cardDescription = (string)_dbfIdToCardInfo[cardDbfId]["description"];
+                string cardType = (string)_dbfIdToCardInfo[cardDbfId]["type"];
+                string cardAttack = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
+                string cardHealth = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
+                string rarity = (string)_dbfIdToCardInfo[cardDbfId]["rarity"];
+
+                Log.Info("Adding card " + cardName);
+                // Add the card to the list
+                deck.Add(new CardInfo(cardDbfId, cardName, cardCost, cardHealth, cardAttack, cardDescription, cardType, rarity, false)); // false as not been played yet
+            }
+
+            return deck;
+        }
 
         // Triggered when the player enters menu
         internal void InMenu()
