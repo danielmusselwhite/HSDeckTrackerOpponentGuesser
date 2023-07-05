@@ -6,6 +6,7 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
 
 <!-- Table with 1 row with 2 columns -->
 | ![InGameView](./Documents/Images/InGameView_F.png) | ![InGameView](./Documents/Images/InGameView_T.png) |
+|----|----|
 | Played Cards Toggle Off | Played Cards Toggle On |
 
 
