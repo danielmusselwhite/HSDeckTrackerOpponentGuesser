@@ -181,7 +181,9 @@ namespace HDT_OpponentGuesser
 
             // Loop through _metaClassDecks and find which has the most cards in common with deckPlayedCards
             int bestFitDeckIndex = -1;
-            double bestFitDeckMatchPercent = _minimumMatch; // we are checking for strict improvement, so this value means we only consider guessing decks that match more than this percentage
+            // we are checking for strict improvement, so this value means we only consider guessing decks that match more than this percentage
+            // so as we have a minimumMatch we want to check greater than or equal to, default it to minimumMatch - 1
+            double bestFitDeckMatchPercent = _minimumMatch-1; 
             double bestWinRate = -1;
             Log.Info("Looping through _metaClassDecks ...");
             for (int i = 0; i < _metaClassDecks.Count(); i++)
