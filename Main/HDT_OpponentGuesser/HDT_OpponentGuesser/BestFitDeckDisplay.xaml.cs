@@ -60,6 +60,7 @@ namespace HDT_OpponentGuesser
                 this.winRateBlock.Text = ((int)Math.Round((double)winRate)).ToString() + "% WR";
                 this.matchPercentBlock.Text = ((int)Math.Round((double)bestFitDeckMatchPercent)).ToString() + "% Match";
                 this.viewDeckButton.Visibility = Visibility.Visible;
+                this.showPlayedCardsButton.Visibility = Visibility.Visible;
                 UpdateDeckCardViews();
             }
             // If no match, display "No Matches Above _minimumMatch%"
@@ -71,6 +72,7 @@ namespace HDT_OpponentGuesser
                 this.matchPercentBlock.Text = "";
                 this.viewDeckButton.Visibility = Visibility.Hidden;
                 this.canvasDeckView.Visibility = Visibility.Hidden;
+                this.showPlayedCardsButton.Visibility = Visibility.Hidden;
             }
 
             UpdatePosition();
@@ -181,7 +183,7 @@ namespace HDT_OpponentGuesser
                     //detect if player has clicked on the button; first confirm users mouse if over the button
                     if (DateTime.Now > _timeAFterClick && IsMouseOverElement(this.viewDeckButton))
                     {
-                        _timeAFterClick = DateTime.Now.AddSeconds(0.5);
+                        _timeAFterClick = DateTime.Now.AddSeconds(1.5);
                         new User32.MouseInput().LmbDown += ViewButtonClicked; // then, if LmbDown event is triggered, call ViewButtonClicked
                     }
 
@@ -218,7 +220,7 @@ namespace HDT_OpponentGuesser
                     this.showPlayedCardsButton.Background = _viewPlayedCards ? Brushes.LightGreen : Brushes.LightSalmon;
                     if (DateTime.Now > _timeAFterClick)
                     {
-                        _timeAFterClick = DateTime.Now.AddSeconds(0.5);
+                        _timeAFterClick = DateTime.Now.AddSeconds(1.5);
                         new User32.MouseInput().LmbDown += ShowPlayedCardsClicked; // then, if LmbDown event is triggered, call ShowPlayedCardsClicked
                     }
                 }
