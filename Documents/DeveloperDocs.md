@@ -4,8 +4,13 @@
 ## Explanation of Architecture and Choices
 
 
-## Diagrams
+### Diagrams
 
+#### Entity Relationship Diagram
+
+![ERD](Images/EntityRelationshipDiagram.png)
+
+Diagram explaining the relationships between the different classes and their properties
 
 ## Useful notes for development
 
