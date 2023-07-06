@@ -9,25 +9,32 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
 |----|----|
 | Played Cards Toggle Off | Played Cards Toggle On |
 
-
-
 - Screenshots above shows the plugin in action
 - A grey box appears in the bottom left of the screen
-  - If no Meta Deck from HSReplay matches the opponents played cards over n%.
-  - If a Meta Deck has been found, it will show the name of the deck (and the first few characters of its ID to differnetiate decks with the same name), winrate of the deck, and the decks % match.
-- if you click the "View Deck" button, it will launch the HSReplay page for that deck in your default browser
-- if you hover over the "View Deck" button, it will display in game the decklist of that deck; colour coding the types of cards for easy viewing
-  - Red = Minion
-  - Blue = Spell
-  - Yellow = Weapon
-  - Green = Location
-  - Magenta = Secret
-  - Star next to name = Legendary
-- Hovering over a card will then display information on that card (e.g. name, cost, type, rarity, (attack and damage for minions), etc.)
-- This updates in real time, every time the opponent plays a card
-- Toggleable button for viewing the played cards vs cards remaining:
-  - When False (Red) - shows the complete deck list we are predicting opponent is using
-  - When True (Green) - modifies this decklist to add in a darker colour the cards opponents have played that exist in the decklist + reducing the count of that card
+- If there is a meta deck on HSReplay that matches at least 50% of the played cards, it will populate that box with:
+  - The name of the decks archetype
+  - The first few characters of the ID (to differentiate decklists of the same archetype)
+  - The percentage match this deck is against the opponents played cards
+  - The winrate of the deck
+    - "Vs You" - if their deck has a record in its matchups for the best fit to your deck
+    - "Vs All" - if not, uses the overall winrate of the deck
+    - Colour scaled: red (bad) = high winrates, green (good) = low winrates
+  - Toggleable button under ViewDeck button to toggle if you want to see the cards predicted as being left in the deck vs the predicted decklist as a whole:
+    - If the button is red, it will show the complete decklist we are predicting opponent is using
+    - If the button is green, it will display the count of each card predicted to be left in the deck + played cards blacked out
+  - ViewDeck Button
+    - On click, will open the HSReplay page for the opponents deck in your default browser
+    - On hover, will display the decklist of the deck in game
+      - Cards are colour coded for easy viewing:
+        - Red = Minion
+        - Blue = Spell
+        - Yellow = Weapon
+        - Green = Location
+        - Magenta = Secret
+        - Star next to name = Legendary
+        - Black = Already Played Card (if toggle button is green)
+    - Hovering over a card in the decklist will display that cards details
+
 
 ## Installation instructions
 
