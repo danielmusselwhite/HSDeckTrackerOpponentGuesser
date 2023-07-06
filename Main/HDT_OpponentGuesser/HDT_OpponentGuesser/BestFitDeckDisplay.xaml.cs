@@ -44,7 +44,7 @@ namespace HDT_OpponentGuesser
             _minimumMatch = minimumMatch;
         }
 
-        public void Update(string deckName, double winRate = -1, double bestFitDeckMatchPercent = -1, string deckId = null, List<CardInfo> guessedDeckList=null, List<CardInfo> playedCardList = null)
+        public void Update(string deckName, double winRate = -1, double bestFitDeckMatchPercent = -1, string deckId = null, List<CardInfo> guessedDeckList = null, List<CardInfo> playedCardList = null, bool matchup = false)
         {
             Log.Info("Updating the BestFitDeckDisplay");
             _guessedDeckList = guessedDeckList;
@@ -57,10 +57,12 @@ namespace HDT_OpponentGuesser
             {
                 Log.Info("Updating the BestFitDeckDisplay with a match");
                 this.deckNameBlock.Text = deckName + " (" + deckId.Substring(0, 4) + ")"; // including first 4 characters of deckId to differentiate between decks with same name
-                this.winRateBlock.Text = ((int)Math.Round((double)winRate)).ToString() + "% WR";
+                this.winRateBlock.Text = ((int)Math.Round((double)winRate)).ToString() + (matchup ? "% VS YOU" : "% VS ALL"); // if this is a match up, display "VS" instead of "WR"
+                this.winRateBlock.Foreground = new SolidColorBrush(Color.FromRgb((byte)(255 * (winRate / 100)), (byte)(255 * (1 - (winRate / 100))), 0)); // scaling the winrate colour red - green, with it being green at 0% and red at 100%
                 this.matchPercentBlock.Text = ((int)Math.Round((double)bestFitDeckMatchPercent)).ToString() + "% Match";
                 this.viewDeckButton.Visibility = Visibility.Visible;
                 this.showPlayedCardsButton.Visibility = Visibility.Visible;
+
                 UpdateDeckCardViews();
             }
             // If no match, display "No Matches Above _minimumMatch%"

@@ -89,6 +89,7 @@
     </Compile>
     <Compile Include="CardDetailsCanvasPopulator.cs" />
     <Compile Include="CardInfo.cs" />
+    <Compile Include="MatchUpsDictionary.cs" />
     <Compile Include="CardView.cs" />
     <Compile Include="OpponentGuesser.cs" />
     <Compile Include="OpponentGuesserPlugin.cs" />

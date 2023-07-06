@@ -18,6 +18,7 @@ using Hearthstone_Deck_Tracker.Plugins;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 using Newtonsoft.Json.Linq;
 using Hearthstone_Deck_Tracker;
+using System.Windows.Forms.VisualStyles;
 
 namespace HDT_OpponentGuesser
 {
@@ -26,15 +27,19 @@ namespace HDT_OpponentGuesser
         private GameV2 _game;
         private Player _opponent;
         private string _class;
-        private JToken _metaClassDecks;
+        private JToken _metaOppClassDecks;
+        private JToken _metaUserClassDecks;
         private bool _firstTurn;
         // Dictionary of card dbfId to a dict of strings containing the rest of the cards info
         private Dictionary<int, Dictionary<string, string>> _dbfIdToCardInfo;
+        private Dictionary<int, Dictionary<int, double>> _matchups;
 
         private BestFitDeckDisplay _bfdDisplay; // reference to the BestFitDeckDisplay class to display this information on the screen to the user
         private string _allMetaDecks; // string containing all meta decks from the API call
 
         private double _minimumMatch = 50; // minimum % of cards that must match for a deck to be considered a possible match
+
+        private Nullable<int> _playerArchetype; // the archetype of the player's deck (used in getting matchups)
 
         // Creating constructor that takes in a reference to the BestFitDeckDisplay class
         public OpponentGuesser(BestFitDeckDisplay displayBestFitDeck)
@@ -44,6 +49,9 @@ namespace HDT_OpponentGuesser
 
             // Getting reference to the card Dictionary
             _dbfIdToCardInfo = CardInfoDictionary.GetCardDictionary();
+
+            // Getting reference to the matchup Dictionary
+            _matchups = MatchUpsDictionary.GetMatchUpsDictionary();
             
             // Getting reference to the BestFitDeckDisplay (the actual GUI) class
             _bfdDisplay = displayBestFitDeck;
@@ -81,9 +89,11 @@ namespace HDT_OpponentGuesser
             _opponent = null; // reset the opponent for this new game
             _class = null; // reset the class for this new game
             _firstTurn = true; // reset the first turn for this new game
-            _metaClassDecks = null;
+            _metaOppClassDecks = null;
+            _metaUserClassDecks = null;
             _bfdDisplay.Update(null); // update the display to show the default text
             _bfdDisplay.Show(); // show the display
+
         }
 
         // Triggered when a turn starts
@@ -107,39 +117,27 @@ namespace HDT_OpponentGuesser
                 JObject allDecks = jsonContent.series.data;
 
                 // Get the Decks for this class only
-                _metaClassDecks = allDecks[_class];
+                _metaOppClassDecks = TransformDeckListTo1D(allDecks[_class]);
+                _metaUserClassDecks = TransformDeckListTo1D(allDecks[_game.Player.Class.ToUpper()]);
 
-
-                #region Transform deck_list into a 1D array
-                // _metaClassDecks[i][deck_list] is in the format "[[cardID, numberInDeck],[cardID, numberInDeck] ...]"
-                // we want it in format [cardID, cardID, cardID, ...]
-
-                // for each deck in _metaClassDecks
-                for (int i = 0; i < _metaClassDecks.Count(); i++)
+                #region Getting the best fit deck for the Player so we can get matchups
+                // get a list of dbfIds of the cards in the users deck
+                List<int> playerCardsDbf = new List<int>();
+                foreach (Card playerCard in _game.Player.PlayerCardList)
                 {
-                    // first convert the string to a matrix
-                    List<List<int>> deckCardsMatrix = JsonConvert.DeserializeObject<List<List<int>>>(_metaClassDecks[i]["deck_list"].ToString());
-
-                    // then convert the matrix to a 1D list, by adding deckCardsMatrix[i][0] to the list deckCards deckCardsMatrix[i][1] times
-                    List<int> deckCards = new List<int>();
-                    for (int j = 0; j < deckCardsMatrix.Count(); j++)
-                    {
-                        for (int k = 0; k < deckCardsMatrix[j][1]; k++)
-                        {
-                            deckCards.Add(deckCardsMatrix[j][0]);
-                        }
-                    }
-
-                    // then replace the deck_list's value with the 1D list
-                    _metaClassDecks[i]["deck_list"] = "[" + string.Join(",", deckCards) + "]";
-
-
+                    // for the count of the card, add the dbfId to the list
+                    for (int i = 0; i < playerCard.Count; i++)
+                        playerCardsDbf.Add(playerCard.DbfId);
                 }
-
                 #endregion
 
-                _firstTurn = false;
+                // get the players best matching archetype
+                (int, double, bool) results = GetBestFitDeck(playerCardsDbf, _metaUserClassDecks);
+                int playerDeckIndex = results.Item1;
+                _playerArchetype = results.Item3 ? (Nullable<int>)_metaUserClassDecks[playerDeckIndex]["archetype_id"] : null;
+                Log.Info("user is playing playerArchetype: " + _playerArchetype);
 
+                _firstTurn = false;
                 #endregion
             }
         }
@@ -168,7 +166,7 @@ namespace HDT_OpponentGuesser
 
 
 
-            #region Determining the best fit meta deck (by comparing % of played cards that are in each deck)
+            
             // creating list of deckPlayedCards dbfId fields
             List<int> deckPlayedCardsDbfId = new List<int>();
             foreach (Card cardPlayed in deckPlayedCards)
@@ -180,60 +178,18 @@ namespace HDT_OpponentGuesser
             // Log the contents of deckPlayedCardsDbfId
             string deckPlayedCardsDbfIdString = string.Join(", ", deckPlayedCardsDbfId);
 
-
-            // Loop through _metaClassDecks and find which has the most cards in common with deckPlayedCards
-            int bestFitDeckIndex = -1;
-            // we are checking for strict improvement, so this value means we only consider guessing decks that match more than this percentage
-            // so as we have a minimumMatch we want to check greater than or equal to, default it to minimumMatch - 1
-            double bestFitDeckMatchPercent = _minimumMatch-1; 
-            double bestWinRate = -1;
-            Log.Info("Looping through _metaClassDecks ...");
-            for (int i = 0; i < _metaClassDecks.Count(); i++)
-            {
-                List<int> deckList = JsonConvert.DeserializeObject<List<int>>(_metaClassDecks[i]["deck_list"].ToString());
-                int matchCount = 0;
-
-                // Loop through the deckPlayedCardsDbfId
-                foreach (int cardDbfId in deckPlayedCardsDbfId)
-                {
-                    // If this card is in the deckList, increment the matchCount and pop only the first instance of it from the deckList so it can't be matched again
-                    if (deckList.Contains(cardDbfId))
-                    {
-                        matchCount++;
-                        deckList.Remove(cardDbfId);
-                    }
-                }
-
-                // Calculate the match percentage and winrate
-                double matchPercent = (double)matchCount / (double)deckPlayedCardsDbfId.Count() * 100;
-                double winRate = (double)_metaClassDecks[i]["win_rate"];
-
-                // If this deck has a higher match percentage than the previous best fit, replace it
-                if (matchPercent > bestFitDeckMatchPercent)
-                {
-                    bestFitDeckIndex = i;
-                    bestFitDeckMatchPercent = matchPercent;
-                    bestWinRate = winRate;
-                }
-                // If this deck has an equal match percentage, then pick the one with the highest winrate
-                else if (matchPercent == bestFitDeckMatchPercent)
-                {
-                    if (winRate > bestWinRate)
-                    {
-                        bestFitDeckIndex = i;
-                        bestFitDeckMatchPercent = matchPercent;
-                        bestWinRate = winRate;
-                    }
-                }
-            }
-            #endregion
+            // get bestFitDeck by calling method for _metaOppClassDecks
+            (int, double, bool) results = GetBestFitDeck(deckPlayedCardsDbfId, _metaOppClassDecks);
+            int bestFitDeckIndex = results.Item1;
+            double bestFitDeckMatchPercent = results.Item2;
+            bool bestFitDeckIsUserDeck = results.Item3;
 
             #region Updating UI for the best fit meta deck
             // If we found a best fit deck...
-            if (bestFitDeckIndex != -1)
+            if (bestFitDeckIsUserDeck)
             {
                 // Get the archetype_id and deck_id of the best fit deck
-                JToken bestFitDeck = _metaClassDecks[bestFitDeckIndex];
+                JToken bestFitDeck = _metaOppClassDecks[bestFitDeckIndex];
                 string archetypeId = bestFitDeck["archetype_id"].ToString();
                 string bestFitDeckId = bestFitDeck["deck_id"].ToString();
 
@@ -274,6 +230,28 @@ namespace HDT_OpponentGuesser
                 #endregion
                 #endregion
 
+
+                // getting the matchup winrate for this deck
+                Log.Info("matchups dict: " + _matchups);
+                Log.Info("getting matchup winrate for this deck");
+                Log.Info("playerArchetype: " + _playerArchetype);
+
+                double bestWinRate = -1;
+                bool matchup = true;
+                // try to find the matchup winrate for players archetype vs opponents archetype; if it doesn't exist, then use the overall winrate for opponents archetype
+                try
+                {
+                    Log.Info("trying to get matchup winrate of opponents deck vs you");
+                    bestWinRate = _matchups[Int32.Parse(archetypeId)][(int)_playerArchetype];
+                }
+                catch
+                {
+                    Log.Info("matchup winrate for this deck doesn't exist, so using overall winrate for opponents archetype");
+                    bestWinRate = (double)bestFitDeck["win_rate"];
+                    matchup = false;
+                }
+                Log.Info("bestWinRate: " + bestWinRate);
+
                 Log.Info("Best fit deck is archetype " + bestDeckName + " at index " + bestFitDeckIndex + " (" + bestFitDeckId + ") with a " + bestFitDeckMatchPercent + "% match (greater than minimum of " + _minimumMatch + "%) and a " + bestWinRate + "% winrate");
 
                 // iterate through each card in bestFitDeck and create a Card entity for it storing all them in a list
@@ -293,7 +271,7 @@ namespace HDT_OpponentGuesser
 
                 Log.Info("calling _bfdDisplay.Update()");
                 // Display the deck name in the overlay
-                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId, guessedDeckListCardInfo, deckPlayedCardsCardInfo);
+                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId, guessedDeckListCardInfo, deckPlayedCardsCardInfo, matchup);
             }
             else
             {
@@ -303,6 +281,76 @@ namespace HDT_OpponentGuesser
                 _bfdDisplay.Update(null);
             }
             #endregion
+        }
+
+        private (int, double, bool) GetBestFitDeck(List<int> deckPlayedCardsDbfId, JToken metaClassDecks) { 
+            // Loop through metaClassDecks and find which has the most cards in common with deckPlayedCards
+            int bestFitDeckIndex = -1;
+            // we are checking for strict improvement, so this value means we only consider guessing decks that match more than this percentage
+            // so as we have a minimumMatch we want to check greater than or equal to, default it to minimumMatch - 1
+
+            double bestFitDeckMatchPercent = _minimumMatch - 1;
+            for (int i = 0; i < metaClassDecks.Count(); i++)
+            {
+                List<int> deckList = JsonConvert.DeserializeObject<List<int>>(metaClassDecks[i]["deck_list"].ToString());
+                int matchCount = 0;
+
+                // Loop through the deckPlayedCardsDbfId
+                foreach (int cardDbfId in deckPlayedCardsDbfId)
+                {
+                    // If this card is in the deckList, increment the matchCount and pop only the first instance of it from the deckList so it can't be matched again
+                    if (deckList.Contains(cardDbfId))
+                    {
+                        matchCount++;
+                        deckList.Remove(cardDbfId);
+                    }
+                }
+
+
+                // Calculate the match percentage and winrate
+                double matchPercent = (double)matchCount / (double)deckPlayedCardsDbfId.Count() * 100;
+
+                // If this deck has a higher match percentage than the previous best fit, replace it
+                if (matchPercent > bestFitDeckMatchPercent)
+                {
+                    bestFitDeckIndex = i;
+                    bestFitDeckMatchPercent = matchPercent;
+                }
+            }
+
+            // return bestFitDeckIndex, bestFitDeckMatchPercent
+            Log.Info("Returning: index=" + bestFitDeckIndex + " match=" + bestFitDeckIndex + "%");
+            return (bestFitDeckIndex, bestFitDeckMatchPercent, bestFitDeckIndex!=-1);
+        }
+
+        private JToken TransformDeckListTo1D(JToken metaClassDecks)
+        {
+            // metaClassDecks[i][deck_list] is in the format "[[cardID, numberInDeck],[cardID, numberInDeck] ...]"
+            // we want it in format [cardID, cardID, cardID, ...]
+
+            // for each deck in metaClassDecks
+            for (int i = 0; i < metaClassDecks.Count(); i++)
+            {
+                // first convert the string to a matrix
+                List<List<int>> deckCardsMatrix = JsonConvert.DeserializeObject<List<List<int>>>(metaClassDecks[i]["deck_list"].ToString());
+
+                // then convert the matrix to a 1D list, by adding deckCardsMatrix[i][0] to the list deckCards deckCardsMatrix[i][1] times
+                List<int> deckCards = new List<int>();
+                for (int j = 0; j < deckCardsMatrix.Count(); j++)
+                {
+                    for (int k = 0; k < deckCardsMatrix[j][1]; k++)
+                    {
+                        deckCards.Add(deckCardsMatrix[j][0]);
+                    }
+                }
+
+                // then replace the deck_list's value with the 1D list
+                metaClassDecks[i]["deck_list"] = "[" + string.Join(",", deckCards) + "]";
+
+
+            }
+
+            return metaClassDecks;
         }
 
         private List<CardInfo> CreateCardInfoDeckFromDBF(List<int> dbfIds)
