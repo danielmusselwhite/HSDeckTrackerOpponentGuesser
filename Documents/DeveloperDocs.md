@@ -34,6 +34,8 @@ Diagram explaining the relationships between the different classes and their pro
 - Capturing and storing stats of players decks vs different deck archetypes
 - Perhaps also using this to find best fit deck for players deck to display their best mulligan choices at game start?
 - Currently only supports Standard_Ranked; could be expanded to get the players game mode on game start and modify the API call to pass that in, instead of defaulting to Standard_Ranked
+- Potentially also display the cards which don't match the predicted deck in the decklist, as wwas in the original design
+    - Didn't end up being incorporated because I thought it could clutter it too much and wasn#t too useful to display 
 
 
 ## Debugging
