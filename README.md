@@ -9,8 +9,7 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
 |----|----|
 | Played Cards Toggle Off | Played Cards Toggle On |
 
-- Screenshots above shows the plugin in action
-- A grey box appears in the bottom left of the screen
+- Plugin appears as grey box in the bottom left of the screen that updates everytime the opponent plays a card.
 - If there is a meta deck on HSReplay that matches at least 50% of the played cards, it will populate that box with:
   - The name of the decks archetype
   - The first few characters of the ID (to differentiate decklists of the same archetype)
