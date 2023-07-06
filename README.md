@@ -33,6 +33,7 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
         - Star next to name = Legendary
         - Black = Already Played Card (if toggle button is green)
     - Hovering over a card in the decklist will display that cards details
+- If there isn't a match, it will instead display "No deck found above 50% match"
 
 
 ## Installation instructions
