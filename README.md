@@ -17,6 +17,7 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
   - The winrate of the deck
     - "Vs You" - if their deck has a record in its matchups for the best fit to your deck
     - "Vs All" - if not, uses the overall winrate of the deck
+    - Colour scaled: red (bad) = high winrates, green (good) = low winrates
   - Toggleable button under ViewDeck button to toggle if you want to see the cards predicted as being left in the deck vs the predicted decklist as a whole:
     - If the button is red, it will show the complete decklist we are predicting opponent is using
     - If the button is green, it will display the count of each card predicted to be left in the deck + played cards blacked out
