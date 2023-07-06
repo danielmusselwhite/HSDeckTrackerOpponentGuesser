@@ -14,6 +14,7 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
 - If there is a meta deck on HSReplay that matches at least 50% of the played cards, it will populate that box with:
   - The name of the decks archetype
   - The first few characters of the ID (to differentiate decklists of the same archetype)
+  - The percentage match this deck is against the opponents played cards
   - The winrate of the deck
     - "Vs You" - if their deck has a record in its matchups for the best fit to your deck
     - "Vs All" - if not, uses the overall winrate of the deck
