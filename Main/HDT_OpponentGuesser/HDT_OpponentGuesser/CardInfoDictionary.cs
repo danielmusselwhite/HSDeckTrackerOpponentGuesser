@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Hearthstone_Deck_Tracker.Utility.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,21 +41,34 @@ namespace HDT_OpponentGuesser
                     string attack = "";
                     string description = "";
                     string rarity = (string)card.rarity;
+                    string group=""; // group eg spellSchool for spells, race for minions, etc.
                     if (type != null)
                     {
-                        if (type.ToUpper() == "SPELL" && card.mechanics != null && card.mechanics.ToString().Contains("SECRET"))
-                            type = "SECRET";
+
+                        group = (string)card.spellSchool;
+
+                        if (type.ToUpper() == "SPELL") 
+                        {
+                            if (card.ContainsKey("spellSchool"))
+                                group = string.Join(",", card.spellSchool);
+
+                            if(card.mechanics != null && card.mechanics.ToString().Contains("SECRET"))
+                                type = "SECRET";
+                        }
+                            
                         else if (type.ToUpper() == "MINION")
                         {
                             health = (string)card.health;
                             attack = (string)card.attack;
+                            if (card.ContainsKey("races"))
+                                group = string.Join(",",card.races);
                         }
                     }
                     if (card.text != null)
                     {
                         description = (string)card.text;
                     }
-                    _cardInfo.Add(dbfId, new Dictionary<string, string>() { { "cost", cost }, { "name", name }, { "health", health }, { "attack", attack }, { "description", description }, { "type", type }, { "rarity", rarity } });
+                    _cardInfo.Add(dbfId, new Dictionary<string, string>() { { "cost", cost }, { "name", name }, { "health", health }, { "attack", attack }, { "description", description }, { "type", type }, { "rarity", rarity }, {"group", group} });
                 }
             }
 

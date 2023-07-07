@@ -21,6 +21,7 @@ namespace HDT_OpponentGuesser
         private string _cardType;
         private int _dbfId;
         private string _rarity;
+        private string _groups;
         private bool _played;
         public static int cardNumber = 0;
         public static int height = 14;
@@ -28,7 +29,7 @@ namespace HDT_OpponentGuesser
         Canvas _parent;
 
 
-        public CardView(string name, int cost, string health, string attack, string description, string type, int dbfId, string rarity, int count, bool played, Canvas parent)
+        public CardView(string name, int cost, string health, string attack, string description, string type, int dbfId, string rarity, string groups, int count, bool played, Canvas parent)
         {
             // store the variables
             _name = name;
@@ -41,6 +42,7 @@ namespace HDT_OpponentGuesser
             _dbfId = dbfId;
             _parent = parent;
             _rarity = rarity;
+            _groups = groups;
 
 
             // create a dict of Type:Color, where: Minion:Orange, Spell:Blue, Secret:Magenta, Weapon:Magenta, Location:Yellow
@@ -119,7 +121,7 @@ namespace HDT_OpponentGuesser
             // clear the canvas
             canvas.Children.Clear();
 
-            CardDetailsCanvasPopulator.populateCardDetails(canvas, _name, _cost, _health, _attack, _description, _cardType, _rarity, this.Background);
+            CardDetailsCanvasPopulator.populateCardDetails(canvas, _name, _cost, _health, _attack, _description, _cardType, _rarity, _groups, this.Background);
         }
     }
 

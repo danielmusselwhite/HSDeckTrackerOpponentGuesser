@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows;
+using System.Windows.Shapes;
 
 namespace HDT_OpponentGuesser
 {
@@ -14,7 +15,7 @@ namespace HDT_OpponentGuesser
     public static class CardDetailsCanvasPopulator
     {
         public static void populateCardDetails(Canvas canvasCardDetails, string cardNameText, int cardManaValue, string cardHealthText,
-        string cardAttackText, string cardDescriptionText, string cardTypeText, string rarity, Brush typeColor)
+        string cardAttackText, string cardDescriptionText, string cardTypeText, string rarity, string groups, Brush typeColor)
         {
             Dictionary<string, SolidColorBrush> typeColorDict = new Dictionary<string, SolidColorBrush>();
             typeColorDict.Add("MINION", Brushes.RosyBrown);
@@ -115,15 +116,12 @@ namespace HDT_OpponentGuesser
                 Width = 177,
                 Height = 104
             };
-
             // remove any @ and $ symbols
             cardDescriptionText = cardDescriptionText.Replace("@", "").Replace("$", "").Replace("{", "").Replace("}", "");
             // remove anything inside of <>
             CardDescription.Text = Regex.Replace(Regex.Replace(cardDescriptionText, @"<[^>]*>", String.Empty), @"\[[^]]*\]", String.Empty);
-
-
             Canvas.SetLeft(CardDescription, 5);
-            Canvas.SetTop(CardDescription, 108);
+            Canvas.SetTop(CardDescription, 82);
             canvasCardDetails.Children.Add(CardDescription);
 
             var CardType = new TextBlock
@@ -144,7 +142,47 @@ namespace HDT_OpponentGuesser
             Canvas.SetTop(CardType, 0);
             canvasCardDetails.Children.Add(CardType);
 
-            // Add the text blocks to the canvas
+            // Creating a Rectangle for the card rarity
+            var CardRarity = new Rectangle
+            {
+                Name = "cardRarity",
+                Stroke = Brushes.Black,
+                StrokeThickness = 2,
+                Fill = (rarity == "COMMON" ? Brushes.White : (rarity == "RARE" ? Brushes.Blue : (rarity == "EPIC" ? Brushes.Purple : Brushes.Orange))),
+                Width = 14,
+                Height = 22,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                RenderTransformOrigin = new Point(0,0),
+                RadiusX = 12,
+                RadiusY = 12
+
+            };
+            Canvas.SetLeft(CardRarity, 86);
+            Canvas.SetTop(CardRarity, 59);
+            canvasCardDetails.Children.Add(CardRarity);
+
+            // set the this.cardGroup
+            var CardGroup = new TextBlock
+            {
+                Name = "cardGroup",
+                TextWrapping = TextWrapping.Wrap,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 10,
+                Foreground = Brushes.Black,
+                TextAlignment = TextAlignment.Center,
+                FontWeight = FontWeights.Bold,
+                Width = 187,
+                Height = 23
+            };
+            CardGroup.Text = groups;
+            Canvas.SetTop(CardGroup, 203);
+            Canvas.SetLeft(CardGroup, 0);
+            canvasCardDetails.Children.Add(CardGroup);
+
+
+
+            // Set the visibility
             canvasCardDetails.Visibility = Visibility.Visible;
         }
     }

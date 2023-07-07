@@ -62,7 +62,6 @@ namespace HDT_OpponentGuesser
                 this.matchPercentBlock.Text = ((int)Math.Round((double)bestFitDeckMatchPercent)).ToString() + "% Match";
                 this.viewDeckButton.Visibility = Visibility.Visible;
                 this.showPlayedCardsButton.Visibility = Visibility.Visible;
-
                 UpdateDeckCardViews();
             }
             // If no match, display "No Matches Above _minimumMatch%"
@@ -121,20 +120,20 @@ namespace HDT_OpponentGuesser
                         if (alreadyPlayedCount > 0 && alreadyPlayedCount <= predictedCount)
                         {
                             // Add grayed out card view showing played count
-                            cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), alreadyPlayedCount, true, this.canvasDeckView));
+                            cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), card.GetGroups(), alreadyPlayedCount, true, this.canvasDeckView));
                         }
                         if (alreadyPlayedCount < predictedCount)
                         {
                             // Add default color card view showing predicted count - played count
                             int remainingCount = predictedCount - alreadyPlayedCount;
-                            cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), remainingCount, false, this.canvasDeckView));
+                            cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), card.GetGroups(), remainingCount, false, this.canvasDeckView));
                         }
                     }
                     // else, just show the predicted cards
                     else
                     {
                         // Add default color card view showing predicted count
-                        cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), predictedCount, false, this.canvasDeckView));
+                        cardViews.Add(new CardView(card.GetName(), card.GetCost(), card.GetHealth(), card.GetAttack(), card.GetDescription(), card.GetCardType(), card.GetDbfId(), card.GetRarity(), card.GetGroups(), predictedCount, false, this.canvasDeckView));
                     }
 
                 }

@@ -38,13 +38,16 @@ namespace HDT_OpponentGuesser
         private BestFitDeckDisplay _bfdDisplay; // reference to the BestFitDeckDisplay class to display this information on the screen to the user
         private string _allMetaDecks; // string containing all meta decks from the API call
 
-        private double _minimumMatch = 50; // minimum % of cards that must match for a deck to be considered a possible match
+        private double _minimumMatch; // minimum % of cards that must match for a deck to be considered a possible match
 
         private Nullable<int> _playerArchetype; // the archetype of the player's deck (used in getting matchups)
 
         // Creating constructor that takes in a reference to the BestFitDeckDisplay class
         public OpponentGuesser(BestFitDeckDisplay displayBestFitDeck)
         {
+            // setting the minimum match percentage
+            _minimumMatch = 50;
+
             // Getting reference to the game
             _game = Hearthstone_Deck_Tracker.Core.Game;
 
@@ -211,8 +214,6 @@ namespace HDT_OpponentGuesser
             double bestFitDeckMatchPercent = _minimumMatch - 1;
             for (int i = 0; i < metaClassDecks.Count(); i++)
             {
-                Log.Info("Trying to desiarilize");
-                Log.Info("Decklist: "+ metaClassDecks[i]["deck_list"]);
                 List<int> deckList = JsonConvert.DeserializeObject<List<int>>(metaClassDecks[i]["deck_list"].ToString());
                 int matchCount = 0;
 
@@ -239,10 +240,13 @@ namespace HDT_OpponentGuesser
                 if (_playerArchetype != null && metaClassDecks[i]["archetype_id"] != null)
                     thisDeckMatchupWinrate = GetMatchupWinrate((int)_playerArchetype, Int32.Parse((string)metaClassDecks[i]["archetype_id"]));
                 double thisDeckWinrate = (double)metaClassDecks[i]["win_rate"];
-
+                
                 // If this deck has a higher match percentage than the previous best fit, replace it
                 if (matchPercent > bestFitDeckMatchPercent)
                 {
+                    Log.Info("Match Percent Beaten: " + matchPercent + " > " + bestFitDeckMatchPercent);
+                    Log.Info("New Best Fit Deck is" + i + " has matchup winrate " + thisDeckMatchupWinrate + " and overall winrate " + thisDeckWinrate + " and match percent " + matchPercent + "%");
+
                     bestFitDeckIndex = i;
                     bestFitDeckMatchPercent = matchPercent;
                     bestFitDeckMatchupWinrate = thisDeckMatchupWinrate;
@@ -254,6 +258,11 @@ namespace HDT_OpponentGuesser
                     // if this deck has a greater matchup winrate then use this
                     if (thisDeckMatchupWinrate > bestFitDeckMatchupWinrate)
                     {
+                        Log.Info("Match Percent Equal: " + matchPercent + " = " + bestFitDeckMatchPercent);
+                        Log.Info("Matchup Winrate Beaten: " + thisDeckMatchupWinrate + " > " + bestFitDeckMatchupWinrate);
+                        Log.Info("New Best Fit Deck is" + i + " has matchup winrate " + thisDeckMatchupWinrate + " and overall winrate " + thisDeckWinrate + " and match percent " + matchPercent + "%");
+
+
                         bestFitDeckIndex = i;
                         bestFitDeckMatchPercent = matchPercent;
                         bestFitDeckMatchupWinrate = thisDeckMatchupWinrate;
@@ -262,6 +271,11 @@ namespace HDT_OpponentGuesser
                     // else if it has an equal matchup winrate but a greater overall winrate then use this
                     else if (thisDeckMatchupWinrate == bestFitDeckMatchupWinrate && thisDeckWinrate > bestFitDeckWinrate)
                     {
+                        Log.Info("Match Percent Equal: " + matchPercent + " = " + bestFitDeckMatchPercent);
+                        Log.Info("Matchup Winrate Equal: " + thisDeckMatchupWinrate + " = " + bestFitDeckMatchupWinrate);
+                        Log.Info("Overall Winrate Beaten: " + thisDeckWinrate + " > " + bestFitDeckWinrate);
+                        Log.Info("New Best Fit Deck is" + i + " has matchup winrate " + thisDeckMatchupWinrate + " and overall winrate " + thisDeckWinrate + " and match percent " + matchPercent + "%");
+
                         bestFitDeckIndex = i;
                         bestFitDeckMatchPercent = matchPercent;
                         bestFitDeckMatchupWinrate = thisDeckMatchupWinrate;
@@ -273,7 +287,7 @@ namespace HDT_OpponentGuesser
             }
 
             // return bestFitDeckIndex, bestFitDeckMatchPercent
-            Log.Info("Returning: index=" + bestFitDeckIndex + " match=" + bestFitDeckIndex + "%");
+            Log.Info("Returning: index=" + bestFitDeckIndex + " match=" + bestFitDeckMatchPercent + "%");
             return (bestFitDeckIndex, bestFitDeckMatchPercent, bestFitDeckIndex!=-1);
         }
 
@@ -334,8 +348,9 @@ namespace HDT_OpponentGuesser
                 string cardAttack = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
                 string cardHealth = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
                 string rarity = (string)_dbfIdToCardInfo[cardDbfId]["rarity"];
+                string groups = (string)_dbfIdToCardInfo[cardDbfId]["group"];
                 // Add the card to the list
-                deck.Add(new CardInfo(cardDbfId, cardName, cardCost, cardHealth, cardAttack, cardDescription, cardType, rarity, false)); // false as not been played yet
+                deck.Add(new CardInfo(cardDbfId, cardName, cardCost, cardHealth, cardAttack, cardDescription, cardType, rarity, groups, false)); // false as not been played yet
             }
 
             return deck;

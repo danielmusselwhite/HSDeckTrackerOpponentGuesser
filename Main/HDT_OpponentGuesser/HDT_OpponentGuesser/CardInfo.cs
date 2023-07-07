@@ -18,10 +18,11 @@ namespace HDT_OpponentGuesser
         private string _type;
         private string _rarity;
         private bool _played;
+        private string _groups;
 
 
         // constructor that takes in the cards info
-        public CardInfo(int dbfId, string name, int cost, string health, string attack, string description, string type, string rarity, bool played)
+        public CardInfo(int dbfId, string name, int cost, string health, string attack, string description, string type, string rarity, string groups, bool played)
         {
             _dbfId = dbfId;
             _name = name;
@@ -32,6 +33,7 @@ namespace HDT_OpponentGuesser
             _type = type;
             _played = played;
             _rarity = rarity;
+            _groups = groups;
         }
 
 
@@ -72,6 +74,10 @@ namespace HDT_OpponentGuesser
         public string GetRarity()
         {
             return _rarity;
+        }
+        public string GetGroups()
+        {
+            return _groups;
         }
         #endregion
 
