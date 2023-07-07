@@ -19,6 +19,7 @@ using Hearthstone_Deck_Tracker.Utility.Logging;
 using Newtonsoft.Json.Linq;
 using Hearthstone_Deck_Tracker;
 using System.Windows.Forms.VisualStyles;
+using System.Text.RegularExpressions;
 
 namespace HDT_OpponentGuesser
 {
@@ -156,21 +157,15 @@ namespace HDT_OpponentGuesser
                 string bestDeckName = MetaDecks.GetDeckArchetypeName(archetypeId, _oppClass);
 
                 // getting the matchup winrate for this deck
-                double bestWinRate = -1;
+                double bestWinRate = GetMatchupWinrate((int)_playerArchetype, Int32.Parse(archetypeId));
                 bool matchup = true;
-                // try to find the matchup winrate for players archetype vs opponents archetype; if it doesn't exist, then use the overall winrate for opponents archetype
-                try
+                if (bestWinRate == -1)
                 {
-                    Log.Info("trying to get matchup winrate of opponents deck vs you");
-                    bestWinRate = _matchups[Int32.Parse(archetypeId)][(int)_playerArchetype];
-                }
-                catch
-                {
-                    Log.Info("matchup winrate for this deck doesn't exist, so using overall winrate for opponents archetype");
                     bestWinRate = (double)bestFitDeck["win_rate"];
                     matchup = false;
                 }
-                Log.Info("bestWinRate: " + bestWinRate);
+
+                Log.Info((matchup ? "bestWinRate MATCHUP: " : "bestWinRate OVERALL: ") + bestWinRate);
 
                 Log.Info("Best fit deck is archetype " + bestDeckName + " at index " + bestFitDeckIndex + " (" + bestFitDeckId + ") with a " + bestFitDeckMatchPercent + "% match (greater than minimum of " + _minimumMatch + "%) and a " + bestWinRate + "% winrate");
 
@@ -206,6 +201,8 @@ namespace HDT_OpponentGuesser
         private (int, double, bool) GetBestFitDeck(List<int> deckPlayedCardsDbfId, JToken metaClassDecks) { 
             // Loop through metaClassDecks and find which has the most cards in common with deckPlayedCards
             int bestFitDeckIndex = -1;
+            double bestFitDeckMatchupWinrate = -1;
+            double bestFitDeckWinrate = -1;
             // we are checking for strict improvement, so this value means we only consider guessing decks that match more than this percentage
             // so as we have a minimumMatch we want to check greater than or equal to, default it to minimumMatch - 1
             Log.Info("Getting best fit deck list for : "+string.Join(",", deckPlayedCardsDbfId));
@@ -219,6 +216,7 @@ namespace HDT_OpponentGuesser
                 List<int> deckList = JsonConvert.DeserializeObject<List<int>>(metaClassDecks[i]["deck_list"].ToString());
                 int matchCount = 0;
 
+                
 
                 // Loop through the deckPlayedCardsDbfId
                 foreach (int cardDbfId in deckPlayedCardsDbfId)
@@ -231,21 +229,67 @@ namespace HDT_OpponentGuesser
                     }
                 }
 
-
                 // Calculate the match percentage and winrate
                 double matchPercent = (double)matchCount / (double)deckPlayedCardsDbfId.Count() * 100;
+
+                // Getting the matchup winrate + overall winrate of this deck
+
+                // if _playerArchetype exists and metaClassDecks[i] has "archetype_id" ...
+                double thisDeckMatchupWinrate = -1;
+                if (_playerArchetype != null && metaClassDecks[i]["archetype_id"] != null)
+                    thisDeckMatchupWinrate = GetMatchupWinrate((int)_playerArchetype, Int32.Parse((string)metaClassDecks[i]["archetype_id"]));
+                double thisDeckWinrate = (double)metaClassDecks[i]["win_rate"];
 
                 // If this deck has a higher match percentage than the previous best fit, replace it
                 if (matchPercent > bestFitDeckMatchPercent)
                 {
                     bestFitDeckIndex = i;
                     bestFitDeckMatchPercent = matchPercent;
+                    bestFitDeckMatchupWinrate = thisDeckMatchupWinrate;
+                    bestFitDeckWinrate = thisDeckWinrate;
                 }
+                // If this deck has an equal match percentage pick the one with the higher winrate by indexing into _matchups
+                else if (matchPercent == bestFitDeckMatchPercent)
+                {
+                    // if this deck has a greater matchup winrate then use this
+                    if (thisDeckMatchupWinrate > bestFitDeckMatchupWinrate)
+                    {
+                        bestFitDeckIndex = i;
+                        bestFitDeckMatchPercent = matchPercent;
+                        bestFitDeckMatchupWinrate = thisDeckMatchupWinrate;
+                        bestFitDeckWinrate = thisDeckWinrate;
+                    }
+                    // else if it has an equal matchup winrate but a greater overall winrate then use this
+                    else if (thisDeckMatchupWinrate == bestFitDeckMatchupWinrate && thisDeckWinrate > bestFitDeckWinrate)
+                    {
+                        bestFitDeckIndex = i;
+                        bestFitDeckMatchPercent = matchPercent;
+                        bestFitDeckMatchupWinrate = thisDeckMatchupWinrate;
+                        bestFitDeckWinrate = thisDeckWinrate;
+                    }
+                    
+                }
+
             }
 
             // return bestFitDeckIndex, bestFitDeckMatchPercent
             Log.Info("Returning: index=" + bestFitDeckIndex + " match=" + bestFitDeckIndex + "%");
             return (bestFitDeckIndex, bestFitDeckMatchPercent, bestFitDeckIndex!=-1);
+        }
+
+        // Function for safely getting the winrate for a matchup
+        private double GetMatchupWinrate(int playerArchetype, int opponentArchetype)
+        {
+            // if the matchup exists, return it
+            if (_matchups.ContainsKey(playerArchetype) && _matchups[playerArchetype].ContainsKey(opponentArchetype))
+            {
+                return _matchups[opponentArchetype][playerArchetype];
+            }
+            // if the matchup doesn't exist, return -1
+            else
+            {
+                return -1;
+            }
         }
 
         // Function to get the players best fit deck so we can get matchups
