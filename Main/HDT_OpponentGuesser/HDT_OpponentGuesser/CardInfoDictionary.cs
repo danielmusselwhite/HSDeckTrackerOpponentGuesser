@@ -11,7 +11,7 @@ namespace HDT_OpponentGuesser
     // Singleton to get the CardInfo - only want to make the API call once as it is large
     internal static class CardInfoDictionary
     {
-        private static Dictionary<int, Dictionary<string, string>> _cardInfo;
+        private static Dictionary<int, Dictionary<string, string>> _cardInfo = null;
 
         // Creating Dictionary of all cards in game for efficient lookup
         public static Dictionary<int, Dictionary<string, string>> GetCardDictionary()

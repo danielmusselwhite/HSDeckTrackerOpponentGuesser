@@ -26,7 +26,7 @@ namespace HDT_OpponentGuesser
     {
         private GameV2 _game;
         private Player _opponent;
-        private string _class;
+        private string _oppClass;
         private JToken _metaOppClassDecks;
         private JToken _metaUserClassDecks;
         private bool _firstTurn;
@@ -58,28 +58,12 @@ namespace HDT_OpponentGuesser
             _bfdDisplay.SetMinimumMatch(_minimumMatch);
             if (Config.Instance.HideInMenu && _game.IsInMenu)
                 _bfdDisplay.Hide();
-            
 
-            #region Do an API call to get a list of all meta decks
-            // Create the URL
-            string url = "https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=GOLD&Region=ALL&TimeRange=CURRENT_PATCH";
-
-
-            // Create the HTTP client
-            HttpClient client = new HttpClient();
-
-            // Make the API call
-            HttpResponseMessage response = client.GetAsync(url).Result;
-
-            // Get the response content
-            HttpContent content = response.Content;
-
-            // Get the string content
-            _allMetaDecks = content.ReadAsStringAsync().Result;
-            content.Dispose();
-            client.Dispose();
-            #endregion
+            // getting list of all the metadecks from hsreplay.net
+            _allMetaDecks = MetaDecks.GetAllMetaDecks();
         }
+
+        
 
 
         // Triggered when a new game starts
@@ -87,13 +71,14 @@ namespace HDT_OpponentGuesser
         {
             // set the private variables
             _opponent = null; // reset the opponent for this new game
-            _class = null; // reset the class for this new game
+            _oppClass = null; // reset the class for this new game
             _firstTurn = true; // reset the first turn for this new game
             _metaOppClassDecks = null;
             _metaUserClassDecks = null;
             _bfdDisplay.Update(null); // update the display to show the default text
             _bfdDisplay.Show(); // show the display
 
+            _matchups = MatchUpsDictionary.GetMatchUpsDictionary(); // call for matchupsdictionary singleton (if it doesn't exist due to API being down, it will be created else will remain)
         }
 
         // Triggered when a turn starts
@@ -104,45 +89,25 @@ namespace HDT_OpponentGuesser
             // setting up params on the first turn of the game once opponent has loaded in
             if (_firstTurn)
             {
+                Log.Info("This is the first turn!");
                 _opponent = _game.Opponent;
-                _class = _opponent.Class;
-                _class = _class.ToUpper();
+                _oppClass = _opponent.Class;
+                _oppClass = _oppClass.ToUpper();
 
-                #region Parsing the _allMetaDecks JSON String to get the list of meta decks for this class
-                // Convert the string content to a JSON object
-                string stringContent = _allMetaDecks;
-                dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
-
-                // Get the jsonContent.series.data and store it to "allDecks"
-                JObject allDecks = jsonContent.series.data;
+                Log.Info("_oppClass = " + _oppClass);
+                Log.Info("_userClass = " + _game.Player.Class.ToUpper());
 
                 // Get the Decks for this class only
-                _metaOppClassDecks = TransformDeckListTo1D(allDecks[_class]);
-                _metaUserClassDecks = TransformDeckListTo1D(allDecks[_game.Player.Class.ToUpper()]);
+                _metaOppClassDecks = MetaDecks.GetClassMetaDecks(_oppClass);
+                _metaUserClassDecks = MetaDecks.GetClassMetaDecks(_game.Player.Class.ToUpper());
 
-                #region Getting the best fit deck for the Player so we can get matchups
-                // get a list of dbfIds of the cards in the users deck
-                List<int> playerCardsDbf = new List<int>();
-                foreach (Card playerCard in _game.Player.PlayerCardList)
-                {
-                    // for the count of the card, add the dbfId to the list
-                    for (int i = 0; i < playerCard.Count; i++)
-                        playerCardsDbf.Add(playerCard.DbfId);
-                }
-                #endregion
-
-                // get the players best matching archetype
-                (int, double, bool) results = GetBestFitDeck(playerCardsDbf, _metaUserClassDecks);
-                int playerDeckIndex = results.Item1;
-                _playerArchetype = results.Item3 ? (Nullable<int>)_metaUserClassDecks[playerDeckIndex]["archetype_id"] : null;
+                // Get the players best fit deck so we can get matchups
+                _playerArchetype = GetPlayerBestFit();
                 Log.Info("user is playing playerArchetype: " + _playerArchetype);
 
                 _firstTurn = false;
-                #endregion
             }
         }
-
-
 
         // Triggered when the opponent plays a card
         internal void OpponentPlay(Card card)
@@ -168,14 +133,7 @@ namespace HDT_OpponentGuesser
 
             
             // creating list of deckPlayedCards dbfId fields
-            List<int> deckPlayedCardsDbfId = new List<int>();
-            foreach (Card cardPlayed in deckPlayedCards)
-            {
-                // for the count of the card, add the dbfId to the list
-                for (int i = 0; i < cardPlayed.Count; i++)
-                    deckPlayedCardsDbfId.Add(cardPlayed.DbfId);
-            }
-            // Log the contents of deckPlayedCardsDbfId
+            List<int> deckPlayedCardsDbfId = GetDbfIDs(deckPlayedCards);
             string deckPlayedCardsDbfIdString = string.Join(", ", deckPlayedCardsDbfId);
 
             // get bestFitDeck by calling method for _metaOppClassDecks
@@ -195,47 +153,9 @@ namespace HDT_OpponentGuesser
 
 
                 // API call to get name of deck with this archetype_id
-                #region Getting the name of the Deck
-                #region Do an API call to get info on this decks archetype
-                // Create the URL
-                string url = $"https://hsreplay.net/api/v1/archetypes/{archetypeId}";
-
-                // Create the HTTP client
-                HttpClient client = new HttpClient();
-
-                // Make the API call
-                HttpResponseMessage response = client.GetAsync(url).Result;
-
-                // Get the response content
-                HttpContent content = response.Content;
-
-                // Get the string content
-                string stringContent = content.ReadAsStringAsync().Result;
-                content.Dispose();
-                client.Dispose();
-                #endregion
-
-                #region Getting the archetype name from this info
-                // Convert the string content to a JSON object
-                dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
-
-                // Get the name from this JSON object
-                string bestDeckName = jsonContent["name"];
-
-                // if there is no name, then use the class name instead
-                if (bestDeckName == null)
-                {
-                    bestDeckName = _opponent.Class.ToString()+" deck";
-                }
-                #endregion
-                #endregion
-
+                string bestDeckName = MetaDecks.GetDeckArchetypeName(archetypeId, _oppClass);
 
                 // getting the matchup winrate for this deck
-                Log.Info("matchups dict: " + _matchups);
-                Log.Info("getting matchup winrate for this deck");
-                Log.Info("playerArchetype: " + _playerArchetype);
-
                 double bestWinRate = -1;
                 bool matchup = true;
                 // try to find the matchup winrate for players archetype vs opponents archetype; if it doesn't exist, then use the overall winrate for opponents archetype
@@ -288,12 +208,17 @@ namespace HDT_OpponentGuesser
             int bestFitDeckIndex = -1;
             // we are checking for strict improvement, so this value means we only consider guessing decks that match more than this percentage
             // so as we have a minimumMatch we want to check greater than or equal to, default it to minimumMatch - 1
+            Log.Info("Getting best fit deck list for : "+string.Join(",", deckPlayedCardsDbfId));
+            Log.Info("Number of metaclassdecks = "+metaClassDecks.Count());
 
             double bestFitDeckMatchPercent = _minimumMatch - 1;
             for (int i = 0; i < metaClassDecks.Count(); i++)
             {
+                Log.Info("Trying to desiarilize");
+                Log.Info("Decklist: "+ metaClassDecks[i]["deck_list"]);
                 List<int> deckList = JsonConvert.DeserializeObject<List<int>>(metaClassDecks[i]["deck_list"].ToString());
                 int matchCount = 0;
+
 
                 // Loop through the deckPlayedCardsDbfId
                 foreach (int cardDbfId in deckPlayedCardsDbfId)
@@ -323,34 +248,33 @@ namespace HDT_OpponentGuesser
             return (bestFitDeckIndex, bestFitDeckMatchPercent, bestFitDeckIndex!=-1);
         }
 
-        private JToken TransformDeckListTo1D(JToken metaClassDecks)
+        // Function to get the players best fit deck so we can get matchups
+        private Nullable<int> GetPlayerBestFit()
         {
-            // metaClassDecks[i][deck_list] is in the format "[[cardID, numberInDeck],[cardID, numberInDeck] ...]"
-            // we want it in format [cardID, cardID, cardID, ...]
+            // get a list of dbfIds of the cards in the users deck
+            List<int> playerCardsDbf = GetDbfIDs(_game.Player.PlayerCardList);
+            string deckPlayedCardsDbfIdString = string.Join(", ", playerCardsDbf);
 
-            // for each deck in metaClassDecks
-            for (int i = 0; i < metaClassDecks.Count(); i++)
+            // get the players best matching archetype
+            (int, double, bool) results = GetBestFitDeck(playerCardsDbf, _metaUserClassDecks);
+            int playerDeckIndex = results.Item1;
+            Nullable<int> playerArchetype = results.Item3 ? (Nullable<int>)_metaUserClassDecks[playerDeckIndex]["archetype_id"] : null;
+
+            return playerArchetype;
+        }
+
+        // Function for getting the list of dbfIds in a list of cards, used to query them in APIs
+        private List<int> GetDbfIDs(List<Card> cards)
+        {
+            List<int> dbfIds = new List<int>();
+            foreach (Card card in cards)
             {
-                // first convert the string to a matrix
-                List<List<int>> deckCardsMatrix = JsonConvert.DeserializeObject<List<List<int>>>(metaClassDecks[i]["deck_list"].ToString());
-
-                // then convert the matrix to a 1D list, by adding deckCardsMatrix[i][0] to the list deckCards deckCardsMatrix[i][1] times
-                List<int> deckCards = new List<int>();
-                for (int j = 0; j < deckCardsMatrix.Count(); j++)
-                {
-                    for (int k = 0; k < deckCardsMatrix[j][1]; k++)
-                    {
-                        deckCards.Add(deckCardsMatrix[j][0]);
-                    }
-                }
-
-                // then replace the deck_list's value with the 1D list
-                metaClassDecks[i]["deck_list"] = "[" + string.Join(",", deckCards) + "]";
-
-
+                // for the count of the card, add the dbfId to the list
+                for (int i = 0; i < card.Count; i++)
+                    dbfIds.Add(card.DbfId);
             }
 
-            return metaClassDecks;
+            return dbfIds;
         }
 
         private List<CardInfo> CreateCardInfoDeckFromDBF(List<int> dbfIds)

@@ -1,115 +1,134 @@
-<mxfile host="app.diagrams.net" modified="2023-07-05T09:06:19.300Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36" etag="_vrLARQFMpgaDBo8Yj7w" version="21.5.2" type="device">
-  <diagram id="R2lEEEUBdFMjLlhIrx00" name="Page-1">
-    <mxGraphModel dx="1834" dy="1160" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0" extFonts="Permanent Marker^https://fonts.googleapis.com/css?family=Permanent+Marker">
-      <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-        <mxCell id="C-vyLk0tnHw3VtMMgP7b-1" value="" style="edgeStyle=entityRelationEdgeStyle;endArrow=ERone;startArrow=ERone;endFill=0;startFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-6" target="4wO5LQYT5ljlnsEUzrKc-9" edge="1">
-          <mxGeometry width="100" height="100" relative="1" as="geometry">
-            <mxPoint x="290" y="195" as="sourcePoint" />
-            <mxPoint x="450" y="195" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endArrow=ERone;endFill=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-1" target="4wO5LQYT5ljlnsEUzrKc-6" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="40" y="195" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-1" value="&amp;lt;&amp;lt;External&amp;gt;&amp;gt;&lt;br&gt;Hearthstone DeckTracker" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e51400;strokeColor=#B20000;fontColor=#ffffff;" parent="1" vertex="1">
-          <mxGeometry x="-290" y="160" width="120" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-6" value="OpponentGuesserPlugin" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" parent="1" vertex="1">
-          <mxGeometry x="40" y="160" width="160" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;startArrow=ERone;startFill=0;endArrow=ERone;endFill=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-9" target="4wO5LQYT5ljlnsEUzrKc-19" edge="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-9" value="OpponentGuesser&lt;br&gt;:&lt;br&gt;IPlugin" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" parent="1" vertex="1">
-          <mxGeometry x="400" y="160" width="160" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-14" value="Implements IPlugin Bridge between our app and HDT" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="-145" y="175" width="160" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-15" value="Calls functional code handling game events detected by HDT" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="220" y="175" width="170" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-16" value="CardInfo" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" parent="1" vertex="1">
-          <mxGeometry x="400" y="-60" width="160" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-17" value="CardView&lt;br&gt;:&lt;br&gt;TextBlock" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" parent="1" vertex="1">
-          <mxGeometry x="1120" y="160" width="160" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-28" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=ERone;startFill=0;endArrow=ERzeroToMany;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-9" target="4wO5LQYT5ljlnsEUzrKc-16" edge="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-19" value="CardInfoDictionary" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" parent="1" vertex="1">
-          <mxGeometry x="400" y="360" width="160" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endArrow=ERone;endFill=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-21" target="4wO5LQYT5ljlnsEUzrKc-22" edge="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-48" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=ERzeroToMany;endFill=0;startArrow=ERone;startFill=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-21" target="4wO5LQYT5ljlnsEUzrKc-17" edge="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-21" value="BestFitDeckDisplay" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" parent="1" vertex="1">
-          <mxGeometry x="760" y="160" width="160" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-22" value="CardDetailsCanvasPopulator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" parent="1" vertex="1">
-          <mxGeometry x="760" y="-60" width="160" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-24" value="" style="edgeStyle=entityRelationEdgeStyle;endArrow=ERone;startArrow=ERone;endFill=0;startFill=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-21" target="4wO5LQYT5ljlnsEUzrKc-9" edge="1">
-          <mxGeometry width="100" height="100" relative="1" as="geometry">
-            <mxPoint x="210" y="200" as="sourcePoint" />
-            <mxPoint x="410" y="200" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-25" value="Updates the GUI using best matching deck on change" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="590" y="175" width="150" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-31" value="&amp;lt;&amp;lt;External&amp;gt;&amp;gt;&lt;br&gt;HearthstoneJson" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e51400;strokeColor=#B20000;fontColor=#ffffff;" parent="1" vertex="1">
-          <mxGeometry x="720" y="360" width="120" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;startArrow=ERone;startFill=0;endArrow=ERone;endFill=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-19" target="4wO5LQYT5ljlnsEUzrKc-31" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="490" y="260" as="sourcePoint" />
-            <mxPoint x="490" y="370" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-34" value="API Request for cardInfo used to populate the dict" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="570" y="375" width="140" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-36" value="Created CardInfo lists, by querying the played cards dbfID against the CardInfoDictionary" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="480" y="20" width="80" height="130" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-38" value="&amp;lt;&amp;lt;External&amp;gt;&amp;gt;&lt;br&gt;HearthstoneJson" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e51400;strokeColor=#B20000;fontColor=#ffffff;" parent="1" vertex="1">
-          <mxGeometry x="720" y="360" width="120" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-39" value="&amp;lt;&amp;lt;External&amp;gt;&amp;gt;&lt;br&gt;HSReplay" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e51400;strokeColor=#B20000;fontColor=#ffffff;" parent="1" vertex="1">
-          <mxGeometry x="170" y="-60" width="120" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-40" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=0;exitDy=0;startArrow=ERone;startFill=0;endArrow=ERone;endFill=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-9" target="4wO5LQYT5ljlnsEUzrKc-39" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="490" y="230" as="sourcePoint" />
-            <mxPoint x="490" y="340" as="targetPoint" />
-            <Array as="points">
-              <mxPoint x="400" y="110" />
-              <mxPoint x="230" y="110" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-43" value="API Requests for all meta decks&lt;br style=&quot;border-color: var(--border-color); text-align: center;&quot;&gt;&lt;span style=&quot;text-align: center;&quot;&gt;+ name of best fitting deck&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="230" y="-10" width="80" height="130" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-44" value="Singleton&lt;br&gt;&lt;span style=&quot;text-align: center;&quot;&gt;to generate CardInfoDictionary&lt;br&gt;allowing efficient lookup of data stored in HearthstoneJson API&amp;nbsp;&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="480" y="230" width="80" height="130" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-47" value="Populates the CardDetails for the card user is hovering over" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="840" y="10" width="80" height="130" as="geometry" />
-        </mxCell>
-        <mxCell id="4wO5LQYT5ljlnsEUzrKc-49" value="Adds a CardView for each card in the deck" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
-          <mxGeometry x="940" y="175" width="140" height="30" as="geometry" />
-        </mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
+<mxfile host="65bd71144e">
+    <diagram id="R2lEEEUBdFMjLlhIrx00" name="Page-1">
+        <mxGraphModel dx="1940" dy="1154" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0" extFonts="Permanent Marker^https://fonts.googleapis.com/css?family=Permanent+Marker">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="C-vyLk0tnHw3VtMMgP7b-1" value="" style="edgeStyle=entityRelationEdgeStyle;endArrow=ERone;startArrow=ERone;endFill=0;startFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-6" target="4wO5LQYT5ljlnsEUzrKc-9" edge="1">
+                    <mxGeometry width="100" height="100" relative="1" as="geometry">
+                        <mxPoint x="290" y="195" as="sourcePoint"/>
+                        <mxPoint x="450" y="195" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endArrow=ERone;endFill=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-1" target="4wO5LQYT5ljlnsEUzrKc-6" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="40" y="195" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-1" value="&amp;lt;&amp;lt;External APP&amp;gt;&amp;gt;&lt;br&gt;Hearthstone DeckTracker" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#a0522d;strokeColor=#6D1F00;fontColor=#ffffff;" parent="1" vertex="1">
+                    <mxGeometry x="-290" y="160" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-6" value="OpponentGuesserPlugin&lt;br&gt;:&lt;br&gt;IPlugin" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6d8764;fontColor=#ffffff;strokeColor=#3A5431;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="160" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;startArrow=ERone;startFill=0;endArrow=ERone;endFill=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-9" target="4wO5LQYT5ljlnsEUzrKc-19" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-9" value="OpponentGuesser" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="160" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-14" value="Implements IPlugin Bridge between our app and HDT" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="-145" y="175" width="160" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-15" value="Calls functional code handling game events detected by HDT" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="175" width="170" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-16" value="CardInfo" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="-60" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-17" value="CardView&lt;br&gt;:&lt;br&gt;TextBlock" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" parent="1" vertex="1">
+                    <mxGeometry x="1120" y="160" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-28" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=ERone;startFill=0;endArrow=ERzeroToMany;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-9" target="4wO5LQYT5ljlnsEUzrKc-16" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-19" value="CardInfoDictionary" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" parent="1" vertex="1">
+                    <mxGeometry x="401" y="360" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endArrow=ERone;endFill=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-21" target="4wO5LQYT5ljlnsEUzrKc-22" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-48" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=ERzeroToMany;endFill=0;startArrow=ERone;startFill=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-21" target="4wO5LQYT5ljlnsEUzrKc-17" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-21" value="BestFitDeckDisplay" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" parent="1" vertex="1">
+                    <mxGeometry x="760" y="160" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-22" value="CardDetailsCanvasPopulator" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" parent="1" vertex="1">
+                    <mxGeometry x="760" y="-60" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-24" value="" style="edgeStyle=entityRelationEdgeStyle;endArrow=ERone;startArrow=ERone;endFill=0;startFill=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-21" target="4wO5LQYT5ljlnsEUzrKc-9" edge="1">
+                    <mxGeometry width="100" height="100" relative="1" as="geometry">
+                        <mxPoint x="210" y="200" as="sourcePoint"/>
+                        <mxPoint x="410" y="200" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-25" value="Updates the GUI using best matching deck on change" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="590" y="175" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-31" value="&amp;lt;&amp;lt;External&amp;gt;&amp;gt;&lt;br&gt;HearthstoneJson" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e51400;strokeColor=#B20000;fontColor=#ffffff;" parent="1" vertex="1">
+                    <mxGeometry x="721" y="360" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;startArrow=ERone;startFill=0;endArrow=ERone;endFill=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="4wO5LQYT5ljlnsEUzrKc-19" target="4wO5LQYT5ljlnsEUzrKc-31" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="491" y="260" as="sourcePoint"/>
+                        <mxPoint x="491" y="370" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-34" value="API Request for cardInfo used to populate the dict" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="571" y="375" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-36" value="Created CardInfo lists, by querying the played cards dbfID against the CardInfoDictionary" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="20" width="80" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-38" value="&amp;lt;&amp;lt;External API&amp;gt;&amp;gt;&lt;br&gt;HearthstoneJson" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e51400;strokeColor=#B20000;fontColor=#ffffff;" parent="1" vertex="1">
+                    <mxGeometry x="721" y="360" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-44" value="Query Cards Info" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="485" y="280" width="53" height="38" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-47" value="Populates the CardDetails for the card user is hovering over" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="840" y="10" width="80" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="4wO5LQYT5ljlnsEUzrKc-49" value="Adds a CardView for each card in the deck" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="940" y="175" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" style="edgeStyle=none;html=1;entryX=0.25;entryY=1;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endArrow=ERone;endFill=0;" edge="1" parent="1" source="2" target="4wO5LQYT5ljlnsEUzrKc-9">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="MatchUpsDictionary" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" vertex="1" parent="1">
+                    <mxGeometry x="160" y="360" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" style="edgeStyle=none;html=1;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endArrow=ERone;endFill=0;" edge="1" parent="1" source="3" target="4wO5LQYT5ljlnsEUzrKc-9">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="MetaDecks" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#76608a;fontColor=#ffffff;strokeColor=#432D57;" vertex="1" parent="1">
+                    <mxGeometry x="-80" y="360" width="160" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="" style="edgeStyle=none;html=1;endArrow=ERone;endFill=0;startArrow=ERone;startFill=0;exitX=0.75;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="6" target="2">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="240" y="505" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="7" style="edgeStyle=none;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endArrow=ERone;endFill=0;" edge="1" parent="1" source="6" target="3">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="&amp;lt;&amp;lt;External API&amp;gt;&amp;gt;&lt;br&gt;HSReplay" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e51400;strokeColor=#B20000;fontColor=#ffffff;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="591" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="API Request for all meta decks" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="48" y="459" width="80" height="54" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="API Request for matchup winrates of all archetypes" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="473" width="80" height="54" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="Query Matchup&lt;br&gt;Winrates" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="376" y="274" width="53" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="Query MetaDecks" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="182" y="250" width="66" height="44" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
 </mxfile>
