@@ -59,39 +59,11 @@ namespace HDT_OpponentGuesser
             if (Config.Instance.HideInMenu && _game.IsInMenu)
                 _bfdDisplay.Hide();
 
-
-            #region 
-            _allMetaDecks = GetAllMetaDecks();
-            #endregion
+            // getting list of all the metadecks from hsreplay.net
+            _allMetaDecks = MetaDecks.GetAllMetaDecks();
         }
 
-        // Function to do an API call to get a list of all meta decks
-        private string GetAllMetaDecks()
-        {
-            HttpClient client;
-            HttpResponseMessage response;
-            try
-            {
-                client = new HttpClient();
-                response = client.GetAsync("https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=GOLD&Region=ALL&TimeRange=CURRENT_PATCH").Result;
-                response.EnsureSuccessStatusCode();
-                if (response.Content == null)
-                {
-                    throw new Exception("response.Content was null");
-                }
-            }
-            // if it fails, do same query but remove current_patch filter
-            catch
-            {
-                Log.Info("Getting matchups for current_patch failed (likely a new patch and backend hasn't been updated yet; trying for all patches");
-                client = new HttpClient();
-                response = client.GetAsync("https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=GOLD&Region=ALL").Result;
-            }
-
-            // Get the string content
-            HttpContent content = response.Content;
-            return content.ReadAsStringAsync().Result;
-        } 
+        
 
 
         // Triggered when a new game starts
@@ -125,46 +97,17 @@ namespace HDT_OpponentGuesser
                 Log.Info("_oppClass = " + _oppClass);
                 Log.Info("_userClass = " + _game.Player.Class.ToUpper());
 
-                #region Parsing the _allMetaDecks JSON String to get the list of meta decks for this class
-                // Convert the string content to a JSON object
-                string stringContent = _allMetaDecks;
-                dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
-
-                // Get the jsonContent.series.data and store it to "allDecks"
-                JObject allDecks = jsonContent.series.data;
-
                 // Get the Decks for this class only
-                _metaOppClassDecks = allDecks[_oppClass];
-                _metaOppClassDecks = TransformDeckListTo1D(_metaOppClassDecks);
-                _metaUserClassDecks = allDecks[_game.Player.Class.ToUpper()];
-                _metaUserClassDecks = TransformDeckListTo1D(_metaUserClassDecks);
+                _metaOppClassDecks = MetaDecks.GetClassMetaDecks(_oppClass);
+                _metaUserClassDecks = MetaDecks.GetClassMetaDecks(_game.Player.Class.ToUpper());
 
-                Log.Info("test");
-                Log.Info(""+_metaOppClassDecks.ToString());
-
-                #region Getting the best fit deck for the Player so we can get matchups
-                // get a list of dbfIds of the cards in the users deck
-                List<int> playerCardsDbf = new List<int>();
-                foreach (Card playerCard in _game.Player.PlayerCardList)
-                {
-                    // for the count of the card, add the dbfId to the list
-                    for (int i = 0; i < playerCard.Count; i++)
-                        playerCardsDbf.Add(playerCard.DbfId);
-                }
-                #endregion
-
-                // get the players best matching archetype
-                (int, double, bool) results = GetBestFitDeck(playerCardsDbf, _metaUserClassDecks);
-                int playerDeckIndex = results.Item1;
-                _playerArchetype = results.Item3 ? (Nullable<int>)_metaUserClassDecks[playerDeckIndex]["archetype_id"] : null;
+                // Get the players best fit deck so we can get matchups
+                _playerArchetype = GetPlayerBestFit();
                 Log.Info("user is playing playerArchetype: " + _playerArchetype);
 
                 _firstTurn = false;
-                #endregion
             }
         }
-
-
 
         // Triggered when the opponent plays a card
         internal void OpponentPlay(Card card)
@@ -190,14 +133,7 @@ namespace HDT_OpponentGuesser
 
             
             // creating list of deckPlayedCards dbfId fields
-            List<int> deckPlayedCardsDbfId = new List<int>();
-            foreach (Card cardPlayed in deckPlayedCards)
-            {
-                // for the count of the card, add the dbfId to the list
-                for (int i = 0; i < cardPlayed.Count; i++)
-                    deckPlayedCardsDbfId.Add(cardPlayed.DbfId);
-            }
-            // Log the contents of deckPlayedCardsDbfId
+            List<int> deckPlayedCardsDbfId = GetDbfIDs(deckPlayedCards);
             string deckPlayedCardsDbfIdString = string.Join(", ", deckPlayedCardsDbfId);
 
             // get bestFitDeck by calling method for _metaOppClassDecks
@@ -351,34 +287,33 @@ namespace HDT_OpponentGuesser
             return (bestFitDeckIndex, bestFitDeckMatchPercent, bestFitDeckIndex!=-1);
         }
 
-        private JToken TransformDeckListTo1D(JToken metaClassDecks)
+        // Function to get the players best fit deck so we can get matchups
+        private Nullable<int> GetPlayerBestFit()
         {
-            // metaClassDecks[i][deck_list] is in the format "[[cardID, numberInDeck],[cardID, numberInDeck] ...]"
-            // we want it in format [cardID, cardID, cardID, ...]
+            // get a list of dbfIds of the cards in the users deck
+            List<int> playerCardsDbf = GetDbfIDs(_game.Player.PlayerCardList);
+            string deckPlayedCardsDbfIdString = string.Join(", ", playerCardsDbf);
 
-            // for each deck in metaClassDecks
-            for (int i = 0; i < metaClassDecks.Count(); i++)
+            // get the players best matching archetype
+            (int, double, bool) results = GetBestFitDeck(playerCardsDbf, _metaUserClassDecks);
+            int playerDeckIndex = results.Item1;
+            Nullable<int> playerArchetype = results.Item3 ? (Nullable<int>)_metaUserClassDecks[playerDeckIndex]["archetype_id"] : null;
+
+            return playerArchetype;
+        }
+
+        // Function for getting the list of dbfIds in a list of cards, used to query them in APIs
+        private List<int> GetDbfIDs(List<Card> cards)
+        {
+            List<int> dbfIds = new List<int>();
+            foreach (Card card in cards)
             {
-                // first convert the string to a matrix
-                List<List<int>> deckCardsMatrix = JsonConvert.DeserializeObject<List<List<int>>>(metaClassDecks[i]["deck_list"].ToString());
-
-                // then convert the matrix to a 1D list, by adding deckCardsMatrix[i][0] to the list deckCards deckCardsMatrix[i][1] times
-                List<int> deckCards = new List<int>();
-                for (int j = 0; j < deckCardsMatrix.Count(); j++)
-                {
-                    for (int k = 0; k < deckCardsMatrix[j][1]; k++)
-                    {
-                        deckCards.Add(deckCardsMatrix[j][0]);
-                    }
-                }
-
-                // then replace the deck_list's value with the 1D list
-                metaClassDecks[i]["deck_list"] = "[" + string.Join(",", deckCards) + "]";
-
-
+                // for the count of the card, add the dbfId to the list
+                for (int i = 0; i < card.Count; i++)
+                    dbfIds.Add(card.DbfId);
             }
 
-            return metaClassDecks;
+            return dbfIds;
         }
 
         private List<CardInfo> CreateCardInfoDeckFromDBF(List<int> dbfIds)
