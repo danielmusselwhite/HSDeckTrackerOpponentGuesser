@@ -26,7 +26,7 @@ namespace HDT_OpponentGuesser
     {
         private GameV2 _game;
         private Player _opponent;
-        private string _class;
+        private string _oppClass;
         private JToken _metaOppClassDecks;
         private JToken _metaUserClassDecks;
         private bool _firstTurn;
@@ -58,28 +58,40 @@ namespace HDT_OpponentGuesser
             _bfdDisplay.SetMinimumMatch(_minimumMatch);
             if (Config.Instance.HideInMenu && _game.IsInMenu)
                 _bfdDisplay.Hide();
-            
-
-            #region Do an API call to get a list of all meta decks
-            // Create the URL
-            string url = "https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=GOLD&Region=ALL&TimeRange=CURRENT_PATCH";
 
 
-            // Create the HTTP client
-            HttpClient client = new HttpClient();
-
-            // Make the API call
-            HttpResponseMessage response = client.GetAsync(url).Result;
-
-            // Get the response content
-            HttpContent content = response.Content;
-
-            // Get the string content
-            _allMetaDecks = content.ReadAsStringAsync().Result;
-            content.Dispose();
-            client.Dispose();
+            #region 
+            _allMetaDecks = GetAllMetaDecks();
             #endregion
         }
+
+        // Function to do an API call to get a list of all meta decks
+        private string GetAllMetaDecks()
+        {
+            HttpClient client;
+            HttpResponseMessage response;
+            try
+            {
+                client = new HttpClient();
+                response = client.GetAsync("https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=GOLD&Region=ALL&TimeRange=CURRENT_PATCH").Result;
+                response.EnsureSuccessStatusCode();
+                if (response.Content == null)
+                {
+                    throw new Exception("response.Content was null");
+                }
+            }
+            // if it fails, do same query but remove current_patch filter
+            catch
+            {
+                Log.Info("Getting matchups for current_patch failed (likely a new patch and backend hasn't been updated yet; trying for all patches");
+                client = new HttpClient();
+                response = client.GetAsync("https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=GOLD&Region=ALL").Result;
+            }
+
+            // Get the string content
+            HttpContent content = response.Content;
+            return content.ReadAsStringAsync().Result;
+        } 
 
 
         // Triggered when a new game starts
@@ -87,13 +99,14 @@ namespace HDT_OpponentGuesser
         {
             // set the private variables
             _opponent = null; // reset the opponent for this new game
-            _class = null; // reset the class for this new game
+            _oppClass = null; // reset the class for this new game
             _firstTurn = true; // reset the first turn for this new game
             _metaOppClassDecks = null;
             _metaUserClassDecks = null;
             _bfdDisplay.Update(null); // update the display to show the default text
             _bfdDisplay.Show(); // show the display
 
+            _matchups = MatchUpsDictionary.GetMatchUpsDictionary(); // call for matchupsdictionary singleton (if it doesn't exist due to API being down, it will be created else will remain)
         }
 
         // Triggered when a turn starts
@@ -104,9 +117,13 @@ namespace HDT_OpponentGuesser
             // setting up params on the first turn of the game once opponent has loaded in
             if (_firstTurn)
             {
+                Log.Info("This is the first turn!");
                 _opponent = _game.Opponent;
-                _class = _opponent.Class;
-                _class = _class.ToUpper();
+                _oppClass = _opponent.Class;
+                _oppClass = _oppClass.ToUpper();
+
+                Log.Info("_oppClass = " + _oppClass);
+                Log.Info("_userClass = " + _game.Player.Class.ToUpper());
 
                 #region Parsing the _allMetaDecks JSON String to get the list of meta decks for this class
                 // Convert the string content to a JSON object
@@ -117,8 +134,13 @@ namespace HDT_OpponentGuesser
                 JObject allDecks = jsonContent.series.data;
 
                 // Get the Decks for this class only
-                _metaOppClassDecks = TransformDeckListTo1D(allDecks[_class]);
-                _metaUserClassDecks = TransformDeckListTo1D(allDecks[_game.Player.Class.ToUpper()]);
+                _metaOppClassDecks = allDecks[_oppClass];
+                _metaOppClassDecks = TransformDeckListTo1D(_metaOppClassDecks);
+                _metaUserClassDecks = allDecks[_game.Player.Class.ToUpper()];
+                _metaUserClassDecks = TransformDeckListTo1D(_metaUserClassDecks);
+
+                Log.Info("test");
+                Log.Info(""+_metaOppClassDecks.ToString());
 
                 #region Getting the best fit deck for the Player so we can get matchups
                 // get a list of dbfIds of the cards in the users deck
@@ -288,12 +310,17 @@ namespace HDT_OpponentGuesser
             int bestFitDeckIndex = -1;
             // we are checking for strict improvement, so this value means we only consider guessing decks that match more than this percentage
             // so as we have a minimumMatch we want to check greater than or equal to, default it to minimumMatch - 1
+            Log.Info("Getting best fit deck list for : "+string.Join(",", deckPlayedCardsDbfId));
+            Log.Info("Number of metaclassdecks = "+metaClassDecks.Count());
 
             double bestFitDeckMatchPercent = _minimumMatch - 1;
             for (int i = 0; i < metaClassDecks.Count(); i++)
             {
+                Log.Info("Trying to desiarilize");
+                Log.Info("Decklist: "+ metaClassDecks[i]["deck_list"]);
                 List<int> deckList = JsonConvert.DeserializeObject<List<int>>(metaClassDecks[i]["deck_list"].ToString());
                 int matchCount = 0;
+
 
                 // Loop through the deckPlayedCardsDbfId
                 foreach (int cardDbfId in deckPlayedCardsDbfId)
@@ -301,6 +328,7 @@ namespace HDT_OpponentGuesser
                     // If this card is in the deckList, increment the matchCount and pop only the first instance of it from the deckList so it can't be matched again
                     if (deckList.Contains(cardDbfId))
                     {
+                        Log.Info("Decklist i " + i + " contains card " + cardDbfId);
                         matchCount++;
                         deckList.Remove(cardDbfId);
                     }
