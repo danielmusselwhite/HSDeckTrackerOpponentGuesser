@@ -153,47 +153,9 @@ namespace HDT_OpponentGuesser
 
 
                 // API call to get name of deck with this archetype_id
-                #region Getting the name of the Deck
-                #region Do an API call to get info on this decks archetype
-                // Create the URL
-                string url = $"https://hsreplay.net/api/v1/archetypes/{archetypeId}";
-
-                // Create the HTTP client
-                HttpClient client = new HttpClient();
-
-                // Make the API call
-                HttpResponseMessage response = client.GetAsync(url).Result;
-
-                // Get the response content
-                HttpContent content = response.Content;
-
-                // Get the string content
-                string stringContent = content.ReadAsStringAsync().Result;
-                content.Dispose();
-                client.Dispose();
-                #endregion
-
-                #region Getting the archetype name from this info
-                // Convert the string content to a JSON object
-                dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
-
-                // Get the name from this JSON object
-                string bestDeckName = jsonContent["name"];
-
-                // if there is no name, then use the class name instead
-                if (bestDeckName == null)
-                {
-                    bestDeckName = _opponent.Class.ToString()+" deck";
-                }
-                #endregion
-                #endregion
-
+                string bestDeckName = MetaDecks.GetDeckArchetypeName(archetypeId, _oppClass);
 
                 // getting the matchup winrate for this deck
-                Log.Info("matchups dict: " + _matchups);
-                Log.Info("getting matchup winrate for this deck");
-                Log.Info("playerArchetype: " + _playerArchetype);
-
                 double bestWinRate = -1;
                 bool matchup = true;
                 // try to find the matchup winrate for players archetype vs opponents archetype; if it doesn't exist, then use the overall winrate for opponents archetype
@@ -264,7 +226,6 @@ namespace HDT_OpponentGuesser
                     // If this card is in the deckList, increment the matchCount and pop only the first instance of it from the deckList so it can't be matched again
                     if (deckList.Contains(cardDbfId))
                     {
-                        Log.Info("Decklist i " + i + " contains card " + cardDbfId);
                         matchCount++;
                         deckList.Remove(cardDbfId);
                     }

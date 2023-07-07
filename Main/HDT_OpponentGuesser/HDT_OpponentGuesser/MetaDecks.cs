@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace HDT_OpponentGuesser
 {
@@ -62,6 +63,45 @@ namespace HDT_OpponentGuesser
             JToken metaClassDecks = TransformDeckListTo1D(allDecks[thisClass]);
 
             return metaClassDecks;
+        }
+
+        // Function for getting the name of the decks archetype
+        public static string GetDeckArchetypeName(string archetypeId, string className)
+        {
+            #region Do an API call to get info on this decks archetype
+            // Create the URL
+            string url = $"https://hsreplay.net/api/v1/archetypes/{archetypeId}";
+
+            // Create the HTTP client
+            HttpClient client = new HttpClient();
+
+            // Make the API call
+            HttpResponseMessage response = client.GetAsync(url).Result;
+
+            // Get the response content
+            HttpContent content = response.Content;
+
+            // Get the string content
+            string stringContent = content.ReadAsStringAsync().Result;
+            content.Dispose();
+            client.Dispose();
+            #endregion
+
+            #region Getting the archetype name from this info
+            // Convert the string content to a JSON object
+            dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
+
+            // Get the name from this JSON object
+            string archetypeName = jsonContent["name"];
+
+            // if there is no name, then use the class name instead
+            if (archetypeName == null)
+            {
+                archetypeName = className + " deck";
+            }
+            #endregion
+
+            return archetypeName;
         }
 
         // metaClassDecks[i][deck_list] is in the format "[[cardID, numberInDeck],[cardID, numberInDeck] ...]"
