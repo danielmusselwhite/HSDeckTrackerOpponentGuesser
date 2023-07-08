@@ -44,13 +44,10 @@ namespace HDT_OpponentGuesser
                     string group=""; // group eg spellSchool for spells, race for minions, etc.
                     if (type != null)
                     {
-
-                        group = (string)card.spellSchool;
-
                         if (type.ToUpper() == "SPELL") 
                         {
                             if (card.ContainsKey("spellSchool"))
-                                group = string.Join(",", card.spellSchool);
+                                group = card.spellSchool;
 
                             if(card.mechanics != null && card.mechanics.ToString().Contains("SECRET"))
                                 type = "SECRET";
