@@ -28,6 +28,15 @@ Diagram explaining the relationships between the different classes and their pro
     1. Adding the Nuget Package to the project
     2. Going into the Debug folder after the build, and copying the dll's from the Nuget Packages you installed
     3. Navigating to %AppData%\HearthstoneDeckTracker\ and pasting the dll's into the folder
+ 
+### Testing
+
+- Build the project
+- Navigate to: '.\HDT_OpponentGuesser\bin\Debug\'
+- Find the 'HDT_OpponentGuesser.dll' inside
+- Close Hearthstone Deck Tracker
+- Copy over the .dll to '%AppData%\HearthstoneDeckTracker\Plugins'
+- Relaunch Hearthstone Deck Tracker
 
 ## Possible Future Directions
 
@@ -39,6 +48,8 @@ Diagram explaining the relationships between the different classes and their pro
 
 
 ## Debugging
+
+Logs are stored here: ('%AppData%\HearthstoneDeckTracker\Logs\')
 
 **If you get anything in log of hsreplay saying "The located assembly's manifest definition does not match the assembly reference."**
 - Just use Nuget to download the version it is wanting in the reference, then copy that dll to the HDT folder
