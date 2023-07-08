@@ -60,6 +60,17 @@ namespace HDT_OpponentGuesser
                             if (card.ContainsKey("races"))
                                 group = string.Join(",",card.races);
                         }
+
+                        else if (type.ToUpper() == "WEAPON")
+                        {
+                            health = (string)card.durability;
+                            attack = (string)card.attack;
+                        }
+
+                        else if (type.ToUpper() == "LOCATION")
+                        {
+                            health = (string)card.health;
+                        }
                     }
                     if (card.text != null)
                     {

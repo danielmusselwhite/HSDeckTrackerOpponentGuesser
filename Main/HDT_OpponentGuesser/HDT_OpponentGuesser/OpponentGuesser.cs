@@ -346,7 +346,7 @@ namespace HDT_OpponentGuesser
                 string cardDescription = (string)_dbfIdToCardInfo[cardDbfId]["description"];
                 string cardType = (string)_dbfIdToCardInfo[cardDbfId]["type"];
                 string cardAttack = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
-                string cardHealth = (string)_dbfIdToCardInfo[cardDbfId]["attack"];
+                string cardHealth = (string)_dbfIdToCardInfo[cardDbfId]["health"];
                 string rarity = (string)_dbfIdToCardInfo[cardDbfId]["rarity"];
                 string groups = (string)_dbfIdToCardInfo[cardDbfId]["group"];
                 // Add the card to the list

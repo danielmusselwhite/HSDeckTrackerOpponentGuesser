@@ -64,8 +64,8 @@ namespace HDT_OpponentGuesser
             Canvas.SetTop(CardMana, 0);
             canvasCardDetails.Children.Add(CardMana);
 
-            // if type is minion, show health and attack
-            if (cardTypeText == "MINION")
+            // if type is minion or weapon or location, show health/durability
+            if (cardTypeText == "MINION" || cardTypeText == "WEAPON" || cardTypeText == "LOCATION")
             {
                 var CardHealth = new TextBlock
                 {
@@ -80,11 +80,15 @@ namespace HDT_OpponentGuesser
                     Width = 93,
                     Height = 27
                 };
-                CardHealth.Text = cardHealthText + " ♡";
+                CardHealth.Text = cardHealthText + (cardTypeText == "MINION" ? " ❤" : "  ⛨");
                 Canvas.SetLeft(CardHealth, 94);
                 Canvas.SetTop(CardHealth, 228);
                 canvasCardDetails.Children.Add(CardHealth);
+            }
 
+            // if type is minion or weapon, show attack
+            if(cardTypeText == "MINION" || cardTypeText == "WEAPON") 
+            { 
                 var CardAttack = new TextBlock
                 {
                     Name = "cardAttack",

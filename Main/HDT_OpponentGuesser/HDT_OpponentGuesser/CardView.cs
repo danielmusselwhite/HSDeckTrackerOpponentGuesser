@@ -81,7 +81,7 @@ namespace HDT_OpponentGuesser
             this.Margin = new Thickness(0, 0, 0, 0);
             this.Padding = new Thickness(0, 0, 0, 0);
 
-            // if minion has not been played, make it bold; if not, make it normal
+            // if card has not been played, make it bold; if not, make it normal
             if (!played)
             {
                 this.FontWeight = FontWeights.Bold;
