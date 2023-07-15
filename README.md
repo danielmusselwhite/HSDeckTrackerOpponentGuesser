@@ -46,14 +46,6 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
       7. Black = Already Played Card (if toggle button is green)
    2. Hovering over a card in the decklist will display that cards details
 8. **Card Details**, only shown if you hover over a card in the decklist
-   1. Card Name
-   2. Card Cost
-   3. Card Type
-   4. Card Rarity
-   5. Card Text
-   6. Card Artist
-   7. Card Set
-   8. Card ID
 
 
 ## Installation instructions
