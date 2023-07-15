@@ -19,15 +19,6 @@ Diagram explaining the relationships between the different classes and their pro
 - The GUI elements in this project are WPF UserControls
 - So to add a new one, simply right click on project and select Add -> User Control (WPF) and name it
     - This will create a .xaml (frontend) and .xaml.cs (backend) file for you
-
-### Using non-standard Nuget Packages/Assemblies/Libraries
-
-- Current version does not use any, but if any changes require them, here is how to use them.
-- In order for them to be used in the plugin, they must be copied to the HearthStoneDeckTracker folder
-- This can be done by:
-    1. Adding the Nuget Package to the project
-    2. Going into the Debug folder after the build, and copying the dll's from the Nuget Packages you installed
-    3. Navigating to %AppData%\HearthstoneDeckTracker\ and pasting the dll's into the folder
  
 ### Testing
 
@@ -53,8 +44,10 @@ Diagram explaining the relationships between the different classes and their pro
 Logs are stored here: ('%AppData%\HearthstoneDeckTracker\Logs\')
 
 **If you get anything in log of hsreplay saying "The located assembly's manifest definition does not match the assembly reference."**
-- Just use Nuget to download the version it is wanting in the reference, then copy that dll to the HDT folder
+- Just use Nuget to download the version it is wanting in the reference, then copy that dll from the Debug folder to the AppData%\HearthstoneDeckTracker\Plugins\ folder
   - Can either be done via Package Manager Console (harder) or in VS Code by right clicking on the project and selecting "Manage Nuget Packages" (easier)
+  - To find the version you are using, right click on the .dll and select properties, then look at the version number on the details tab
+
 ## Useful Links
 
 - [Creating a Plugin](https://github.com/HearthSim/Hearthstone-Deck-Tracker/wiki/Creating-Plugins)
