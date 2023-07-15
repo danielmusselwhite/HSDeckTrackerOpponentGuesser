@@ -34,6 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="HearthDb, Version=26.6.0.0, Culture=neutral, PublicKeyToken=null" />
+    <Reference Include="HearthMirror, Version=26.6.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="HearthstoneDeckTracker">
       <HintPath>..\..\..\..\..\..\..\..\AppData\Local\HearthstoneDeckTracker\app-1.20.10\HearthstoneDeckTracker.exe</HintPath>
     </Reference>
@@ -89,6 +90,7 @@
     </Compile>
     <Compile Include="CardDetailsCanvasPopulator.cs" />
     <Compile Include="CardInfo.cs" />
+    <Compile Include="HsrSessionCookieGetter.cs" />
     <Compile Include="MatchUpsDictionary.cs" />
     <Compile Include="CardView.cs" />
     <Compile Include="MetaDecks.cs" />

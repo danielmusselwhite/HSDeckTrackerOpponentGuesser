@@ -15,45 +15,79 @@ namespace HDT_OpponentGuesser
     {
 
         private static string _allMetaDecks = "";
+        private static string _lastRank = "";
 
         // Function to do an API call to get a list of all meta decks
-        public static string GetAllMetaDecks()
+        public static string GetAllMetaDecks(string rankRange)
         {
-            HttpClient client;
-            HttpResponseMessage response;
-            try
+            if (_allMetaDecks == null || rankRange != _lastRank)
             {
-                client = new HttpClient();
-                response = client.GetAsync("https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=GOLD&Region=ALL&TimeRange=CURRENT_PATCH").Result;
-                response.EnsureSuccessStatusCode();
-                if (response.Content == null)
+                try
                 {
-                    throw new Exception("response.Content was null");
+
+                    Log.Info((_allMetaDecks == null ? "AllMetaDecks is null " : "Rank has changed from " + _lastRank + " to " + rankRange) + " so creating and populating AllMetaDecks dict");
+
+                    // if a new patch, then current_patch will fail so try first
+                    HttpResponseMessage response;
+                    try
+                    {
+                        response = GetAllMetaDecksResult(rankRange, true);
+                        if (response.Content == null)
+                        {
+                            throw new Exception("response.Content was null");
+                        }
+                    }
+                    // if it fails, do same query but remove current_patch filter
+                    catch
+                    {
+                        Log.Info("Getting matchups for current_patch failed (likely a new patch and backend hasn't been updated yet; trying for all patches");
+                        response = GetAllMetaDecksResult(rankRange, false);
+                    }
+
+                    // Get the string content
+                    HttpContent content = response.Content;
+
+                    _allMetaDecks = content.ReadAsStringAsync().Result;
+                    _lastRank = rankRange;
+                    Log.Info("Successfully created and populated _allMetaDecks for rank: " + rankRange);
                 }
-            }
-            // if it fails, do same query but remove current_patch filter
-            catch
-            {
-                Log.Info("Getting matchups for current_patch failed (likely a new patch and backend hasn't been updated yet; trying for all patches");
-                client = new HttpClient();
-                response = client.GetAsync("https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange=GOLD&Region=ALL").Result;
+                catch
+                {
+                    // API failed (likely due to downtime), so return null so that the opponent guesser will use the opponents overall winrate instead of their matchup against us
+                    // Can retry next game in case API is back up
+                    _allMetaDecks = null;
+                    Log.Info("Failed to create and populate allMetaDecks");
+                }
+                
             }
 
-            // Get the string content
-            HttpContent content = response.Content;
-
-            _allMetaDecks = content.ReadAsStringAsync().Result;
             return _allMetaDecks;
         }
-    
-    
+
+        // function for getting the httpResponseMessage for the API call parameterized
+        private static HttpResponseMessage GetAllMetaDecksResult(string rankRange, bool currentPatch)
+        {
+            string currentPatchString = currentPatch ? "&TimeRange=CURRENT_PATCH" : "";
+
+            string sessionCookie = HsrSessionCookieGetter.GetSessionCookie();
+            var cookieContainer = new System.Net.CookieContainer();
+            var handler = new System.Net.Http.HttpClientHandler() { CookieContainer = cookieContainer };
+            var httpClient = new HttpClient(handler);
+            if (sessionCookie != null)
+                httpClient.DefaultRequestHeaders.Add("Cookie", "sessionid=" + sessionCookie);
+            HttpResponseMessage response = httpClient.GetAsync($"https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange={rankRange}{currentPatchString}").Result;
+            response.EnsureSuccessStatusCode();
+            return response;
+        }
+
+
         // Function to filter _allMetaDecks to only include decks belonging to a specified class
-        public static JToken GetClassMetaDecks(string thisClass)
+        public static JToken GetClassMetaDecks(string thisClass, string rankRange)
         {
             //region Parsing the _allMetaDecks JSON String to get the list of meta decks for this class
             
             // Convert the string content to a JSON object
-            string stringContent = _allMetaDecks;
+            string stringContent = GetAllMetaDecks(rankRange);
             dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
 
             // Get the jsonContent.series.data and store it to "allDecks"

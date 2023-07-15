@@ -14,6 +14,7 @@
             <TextBlock x:Name="matchPercentBlock" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Center" Width="116" FontSize="12" Foreground="White" TextAlignment="Center" FontWeight="Bold"><Run Language="en-gb" Text="xxx"/></TextBlock>
             <TextBlock x:Name="viewDeckButton" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Width="62" Foreground="Black" TextAlignment="Center" Background="SlateBlue" Canvas.Left="116" FontSize="10" Height="13" Text="View Deck"/>
             <TextBlock x:Name="showPlayedCardsButton" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Width="28" Foreground="Black" TextAlignment="Center" Background="Green" Canvas.Left="132" FontSize="10" Height="13" Text="⟳🂣" Canvas.Top="13"/>
+            <Rectangle x:Name="rankColour" Height="14" Stroke="Black" StrokeThickness="1" Fill="AliceBlue" Width="14" RenderTransformOrigin="0,0" HorizontalAlignment="Left" Canvas.Left="275" Canvas.Top="18" VerticalAlignment="Center" RadiusX="12" RadiusY="12"/>
         </Canvas>
 
         <!-- The Deck View Itself -->

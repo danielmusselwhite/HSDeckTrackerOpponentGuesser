@@ -44,7 +44,7 @@ namespace HDT_OpponentGuesser
             _minimumMatch = minimumMatch;
         }
 
-        public void Update(string deckName, double winRate = -1, double bestFitDeckMatchPercent = -1, string deckId = null, List<CardInfo> guessedDeckList = null, List<CardInfo> playedCardList = null, bool matchup = false)
+        public void Update(string deckName, double winRate = -1, double bestFitDeckMatchPercent = -1, string deckId = null, List<CardInfo> guessedDeckList = null, List<CardInfo> playedCardList = null, string rank=null, bool matchup = false)
         {
             Log.Info("Updating the BestFitDeckDisplay");
             _guessedDeckList = guessedDeckList;
@@ -62,6 +62,35 @@ namespace HDT_OpponentGuesser
                 this.matchPercentBlock.Text = ((int)Math.Round((double)bestFitDeckMatchPercent)).ToString() + "% Match";
                 this.viewDeckButton.Visibility = Visibility.Visible;
                 this.showPlayedCardsButton.Visibility = Visibility.Visible;
+
+                // if rank == Bronze, this.rankColour.Fill = Brown; Silver == Grey; Gold == Yellow; Platinum == Light Blue; Diamond == Cyan; Legend == Orange
+                
+                switch (rank)
+                {
+                    case "BRONZE":
+                        this.rankColour.Fill = new SolidColorBrush(Color.FromRgb(205, 127, 50));
+                        break;
+                    case "SILVER":
+                        this.rankColour.Fill = new SolidColorBrush(Color.FromRgb(192, 192, 192));
+                        break;
+                    case "GOLD":
+                        this.rankColour.Fill = new SolidColorBrush(Color.FromRgb(255, 215, 0));
+                        break;
+                    case "PLATINUM":
+                        this.rankColour.Fill = new SolidColorBrush(Color.FromRgb(173, 216, 230));
+                        break;
+                    case "DIAMOND":
+                        this.rankColour.Fill = new SolidColorBrush(Color.FromRgb(0, 255, 255));
+                        break;
+                    case "LEGEND":
+                        this.rankColour.Fill = new SolidColorBrush(Color.FromRgb(255, 165, 0));
+                        break;
+                    default:
+                        this.rankColour.Fill = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        break;
+                }
+                
+
                 UpdateDeckCardViews();
             }
             // If no match, display "No Matches Above _minimumMatch%"

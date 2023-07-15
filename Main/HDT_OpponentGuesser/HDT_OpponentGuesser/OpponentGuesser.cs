@@ -20,6 +20,9 @@ using Newtonsoft.Json.Linq;
 using Hearthstone_Deck_Tracker;
 using System.Windows.Forms.VisualStyles;
 using System.Text.RegularExpressions;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using Hearthstone_Deck_Tracker.FlyoutControls.Options.HSReplay;
+using Hearthstone_Deck_Tracker.HsReplay.Data;
 
 namespace HDT_OpponentGuesser
 {
@@ -36,11 +39,12 @@ namespace HDT_OpponentGuesser
         private Dictionary<int, Dictionary<int, double>> _matchups;
 
         private BestFitDeckDisplay _bfdDisplay; // reference to the BestFitDeckDisplay class to display this information on the screen to the user
-        private string _allMetaDecks; // string containing all meta decks from the API call
 
         private double _minimumMatch; // minimum % of cards that must match for a deck to be considered a possible match
 
         private Nullable<int> _playerArchetype; // the archetype of the player's deck (used in getting matchups)
+
+        private string _gameRank; // the rank of the current game
 
         // Creating constructor that takes in a reference to the BestFitDeckDisplay class
         public OpponentGuesser(BestFitDeckDisplay displayBestFitDeck)
@@ -53,18 +57,12 @@ namespace HDT_OpponentGuesser
 
             // Getting reference to the card Dictionary
             _dbfIdToCardInfo = CardInfoDictionary.GetCardDictionary();
-
-            // Getting reference to the matchup Dictionary
-            _matchups = MatchUpsDictionary.GetMatchUpsDictionary();
             
             // Getting reference to the BestFitDeckDisplay (the actual GUI) class
             _bfdDisplay = displayBestFitDeck;
             _bfdDisplay.SetMinimumMatch(_minimumMatch);
             if (Config.Instance.HideInMenu && _game.IsInMenu)
                 _bfdDisplay.Hide();
-
-            // getting list of all the metadecks from hsreplay.net
-            _allMetaDecks = MetaDecks.GetAllMetaDecks();
         }
 
         
@@ -81,8 +79,6 @@ namespace HDT_OpponentGuesser
             _metaUserClassDecks = null;
             _bfdDisplay.Update(null); // update the display to show the default text
             _bfdDisplay.Show(); // show the display
-
-            _matchups = MatchUpsDictionary.GetMatchUpsDictionary(); // call for matchupsdictionary singleton (if it doesn't exist due to API being down, it will be created else will remain)
         }
 
         // Triggered when a turn starts
@@ -93,6 +89,13 @@ namespace HDT_OpponentGuesser
             // setting up params on the first turn of the game once opponent has loaded in
             if (_firstTurn)
             {
+                if(_game.CurrentFormat.ToString() != "Standard")
+                {
+                    Log.Info("This is a " + _game.CurrentFormat + " game, not running plugin for this game");
+                    return;
+                }
+
+
                 Log.Info("This is the first turn!");
                 _opponent = _game.Opponent;
                 _oppClass = _opponent.Class;
@@ -101,13 +104,55 @@ namespace HDT_OpponentGuesser
                 Log.Info("_oppClass = " + _oppClass);
                 Log.Info("_userClass = " + _game.Player.Class.ToUpper());
 
+
+
+                // getting their rank in standard
+                int rankInt = _game.MatchInfo.LocalPlayer.StandardRank;
+                Log.Info("rankInt is " + rankInt);
+                string rankString = "GOLD"; // default to GOLD
+                switch(rankInt)
+                {
+                    case 0:
+                        rankString = "BRONZE";
+                        break;
+                    case 1:
+                        rankString = "SILVER";
+                        break;
+                    case 2:
+                        rankString = "GOLD";
+                        break;
+                    case 3:
+                        rankString = "PLATINUM";
+                        break;
+                    case 4:
+                        rankString = "DIAMOND";
+                        break;
+                    case 5:
+                        rankString = "LEGEND";
+                        break;
+                }
+                Log.Info("User is rank " + rankString + " in standard.");
+                // if user isn't premium, user and user rank is Platinum, Diamond, or Legend; then use the rank GOLD instead
+                if (!HsrSessionCookieGetter.IsPremium() && (rankString == "PLATINUM" || rankString == "DIAMOND" || rankString == "LEGEND"))
+                {
+                    Log.Info("User is not premium, and is playing a " + rankString + " game. Using GOLD rank instead as that is the max available for free.");
+                    rankString = "GOLD";
+                }
+                _gameRank = rankString;
+
+                // call for matchupsdictionary singleton (called at start of game and only updates 1. if it doesn't exist (first game) or 2. if the rank range has changed since the last game.
+                _matchups = MatchUpsDictionary.GetMatchUpsDictionary(rankString);
+
+
+
                 // Get the Decks for this class only
-                _metaOppClassDecks = MetaDecks.GetClassMetaDecks(_oppClass);
-                _metaUserClassDecks = MetaDecks.GetClassMetaDecks(_game.Player.Class.ToUpper());
+                _metaOppClassDecks = MetaDecks.GetClassMetaDecks(_oppClass, rankString);
+                _metaUserClassDecks = MetaDecks.GetClassMetaDecks(_game.Player.Class.ToUpper(), rankString);
 
                 // Get the players best fit deck so we can get matchups
                 _playerArchetype = GetPlayerBestFit();
                 Log.Info("user is playing playerArchetype: " + _playerArchetype);
+
 
                 _firstTurn = false;
             }
@@ -116,6 +161,9 @@ namespace HDT_OpponentGuesser
         // Triggered when the opponent plays a card
         internal void OpponentPlay(Card card)
         {
+            if (_game.CurrentFormat.ToString() != "Standard")
+                return;
+
             #region Getting the list of cards the opponent played that originated from their deck
             // Log some core info on the card that was just played
             Log.Info($"Opponent played {card.Name} ({card.Id}), {card.Cost}, {card.DbfId}");
@@ -189,7 +237,7 @@ namespace HDT_OpponentGuesser
 
                 Log.Info("calling _bfdDisplay.Update()");
                 // Display the deck name in the overlay
-                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId, guessedDeckListCardInfo, deckPlayedCardsCardInfo, matchup);
+                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId, guessedDeckListCardInfo, deckPlayedCardsCardInfo, _gameRank, matchup);
             }
             else
             {
