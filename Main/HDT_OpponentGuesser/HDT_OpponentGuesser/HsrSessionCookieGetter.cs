@@ -7,6 +7,11 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
+
 namespace HDT_OpponentGuesser
 {
     internal class HsrSessionCookieGetter
@@ -14,15 +19,38 @@ namespace HDT_OpponentGuesser
         // function for getting the session cookie, to be used in (null if they aren't logged in)
         public static string GetSessionCookie()
         {
-            // getting the session cookie from the hsreplay.net website
-            var cookieContainer = new System.Net.CookieContainer();
-            var handler = new System.Net.Http.HttpClientHandler() { CookieContainer = cookieContainer };
-            var httpClient = new HttpClient(handler);
-            var response = httpClient.GetAsync("https://hsreplay.net/").Result;
-            response.EnsureSuccessStatusCode();
-            var cookies = cookieContainer.GetCookies(new Uri("https://hsreplay.net/")).Cast<System.Net.Cookie>();
-            var sessionCookie = cookies.FirstOrDefault(x => x.Name == "sessionid");
-            return sessionCookie != null ? sessionCookie.Value : null;
+            Log.Info("trying to get session cookie");
+
+            // Launch the preferred browser
+            IWebDriver driver = new ChromeDriver();
+
+            // Open hsreplay.net/login
+            driver.Navigate().GoToUrl("https://hsreplay.net/login");
+
+            // Wait for user to login
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            // wait for url to change to hsreplay.net/welcome
+            wait.Until(ExpectedConditions.UrlContains("hsreplay.net/welcome"));
+
+            // Get the sessionid cookie after login
+            var sessionIdCookie = driver.Manage().Cookies.GetCookieNamed("sessionid");
+
+            // Extract the value of the sessionid cookie
+            string sessionId = sessionIdCookie?.Value;
+
+            // Output the sessionid
+            if (sessionId != null)
+            {
+                Log.Info("Session ID: " + sessionId);
+                driver.Quit();
+                return sessionId;
+            }
+            else
+            {
+                Log.Info("Failed to retrieve session ID.");
+                driver.Quit();
+                return null;
+            }
         }
 
         // function using the sessionCookie to test if this is a premium account or not

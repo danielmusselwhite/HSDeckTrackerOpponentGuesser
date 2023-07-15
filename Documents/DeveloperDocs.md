@@ -55,6 +55,7 @@ Logs are stored here: ('%AppData%\HearthstoneDeckTracker\Logs\')
 **If you get anything in log of hsreplay saying "The located assembly's manifest definition does not match the assembly reference."**
 - Just use Nuget to download the version it is wanting in the reference, then copy that dll to the HDT folder
   - Can either be done via Package Manager Console (harder) or in VS Code by right clicking on the project and selecting "Manage Nuget Packages" (easier)
+  - To find the version you are using, right click on the .dll and select properties, then look at the version number on the details tab
 ## Useful Links
 
 - [Creating a Plugin](https://github.com/HearthSim/Hearthstone-Deck-Tracker/wiki/Creating-Plugins)
