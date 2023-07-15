@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
+using System.Net;
 
 namespace HDT_OpponentGuesser
 {
@@ -28,13 +29,13 @@ namespace HDT_OpponentGuesser
                     Log.Info((_allMetaDecks == null ? "AllMetaDecks is null " : "Rank has changed from " + _lastRank + " to " + rankRange) + " so creating and populating AllMetaDecks dict");
 
                     // if a new patch, then current_patch will fail so try first
-                    HttpResponseMessage response;
+                    HttpWebResponse response;
                     try
                     {
                         response = GetAllMetaDecksResult(rankRange, true);
-                        if (response.Content == null)
+                        if (response == null)
                         {
-                            throw new Exception("response.Content was null");
+                            throw new Exception("response was null");
                         }
                     }
                     // if it fails, do same query but remove current_patch filter
@@ -45,9 +46,7 @@ namespace HDT_OpponentGuesser
                     }
 
                     // Get the string content
-                    HttpContent content = response.Content;
-
-                    _allMetaDecks = content.ReadAsStringAsync().Result;
+                    _allMetaDecks = new System.IO.StreamReader(response.GetResponseStream()).ReadToEnd();
                     _lastRank = rankRange;
                     Log.Info("Successfully created and populated _allMetaDecks for rank: " + rankRange);
                 }
@@ -65,18 +64,28 @@ namespace HDT_OpponentGuesser
         }
 
         // function for getting the httpResponseMessage for the API call parameterized
-        private static HttpResponseMessage GetAllMetaDecksResult(string rankRange, bool currentPatch)
+        private static HttpWebResponse GetAllMetaDecksResult(string rankRange, bool currentPatch)
         {
+            Log.Info("Making metadecks request for rank: " + rankRange + " with currentPatch: " + currentPatch);
             string currentPatchString = currentPatch ? "&TimeRange=CURRENT_PATCH" : "";
 
-            string sessionCookie = HsrSessionCookieGetter.GetSessionCookie();
-            var cookieContainer = new System.Net.CookieContainer();
-            var handler = new System.Net.Http.HttpClientHandler() { CookieContainer = cookieContainer };
-            var httpClient = new HttpClient(handler);
+            string sessionCookie = HsrSessionCookieGetter._sessionId;
+
+            
+            // Create the HTTP request
+            Log.Info("Requesting metadecks for rank: " + rankRange + " with sessionCookie: " + sessionCookie);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create($"https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange={rankRange}{currentPatchString}");
+            request.Method = "GET";
+
+            // Add the session ID as a cookie
             if (sessionCookie != null)
-                httpClient.DefaultRequestHeaders.Add("Cookie", "sessionid=" + sessionCookie);
-            HttpResponseMessage response = httpClient.GetAsync($"https://hsreplay.net/analytics/query/list_decks_by_win_rate_v2/?GameType=RANKED_STANDARD&LeagueRankRange={rankRange}{currentPatchString}").Result;
-            response.EnsureSuccessStatusCode();
+            {
+                request.CookieContainer = new CookieContainer();
+                request.CookieContainer.Add(new System.Net.Cookie("sessionid", sessionCookie) { Domain = "hsreplay.net" });
+            }
+
+            // Send the request and get the response
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             return response;
         }
 

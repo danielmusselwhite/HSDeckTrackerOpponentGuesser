@@ -4,36 +4,56 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
 
 ## Explanation of the plugin
 
+### On Launch
+- Upon loading the plugin a Chrome instance will be launched prompting you to login to hsreplay. If you own a premium account and wish to see data from rank Platinum and above, you must login. Else you do not own premium or are ranked Gold and below, you can close the browser without logging in.
+
+### In Game
 <!-- Table with 1 row with 2 columns -->
-| ![InGameView](./Documents/Images/InGameView_F.png) | ![InGameView](./Documents/Images/InGameView_T.png) |
-|----|----|
-| Played Cards Toggle Off | Played Cards Toggle On |
+ |![InGameView](./Documents/Images/InGameView.png) |
+|----|
+| Screenshot of plugin in action  |
 
 - Plugin appears as grey box in the bottom left of the screen that updates everytime the opponent plays a card.
-- If there is a meta deck on HSReplay that matches at least 50% of the played cards, it will populate that box with:
-  - The name of the decks archetype
-  - The first few characters of the ID (to differentiate decklists of the same archetype)
-  - The percentage match this deck is against the opponents played cards
-  - The winrate of the deck
-    - "Vs You" - if their deck has a record in its matchups for the best fit to your deck
-    - "Vs All" - if not, uses the overall winrate of the deck
-    - Colour scaled: red (bad) = high winrates, green (good) = low winrates
-  - Toggleable button under ViewDeck button to toggle if you want to see the cards predicted as being left in the deck vs the predicted decklist as a whole:
-    - If the button is red, it will show the complete decklist we are predicting opponent is using
-    - If the button is green, it will display the count of each card predicted to be left in the deck + played cards blacked out
-  - ViewDeck Button
-    - On click, will open the HSReplay page for the opponents deck in your default browser
-    - On hover, will display the decklist of the deck in game
-      - Cards are colour coded for easy viewing:
-        - Red = Minion
-        - Blue = Spell
-        - Yellow = Weapon
-        - Green = Location
-        - Magenta = Secret
-        - Star next to name = Legendary
-        - Black = Already Played Card (if toggle button is green)
-    - Hovering over a card in the decklist will display that cards details
-- If there isn't a match, it will instead display "No deck found above 50% match"
+- If Plugin cannot find a match above 50% with a meta deck on hsreplay.net, the box will be empty besides a message saying "No Match"
+- Once a match has been found, the plugin will update with the following information shown in the screenshot:
+1. **The name of the decks archetype** and the first few characters of the ID (to differentiate decklists of the same archetype)
+2. A coloured indicator of the **rank from which this data has been gathered**. If you logged in when prompted + own a premium account it can go up to Legend, otherwise it will be capped at Gold.
+   1. Bronze = Brown
+   2. Silver = Grey
+   3. Gold = Yellow
+   4. Platinum = Pale Blue
+   5. Diamond = Cyan
+   6. Legend = Orange
+3. The **percentage match** this deck is against the opponents played cards
+4. The **winrate** of the deck
+   1. "Vs You" - if their deck has a record in its matchups for the best fit to your deck
+   2. "Vs All" - if not, uses the overall winrate of the deck
+   3. Colour scaled: red (bad) = high winrates, green (good) = low winrates
+5. **Toggleable button** for if you want to see the complete predicted decklist, or the list of cards predicted to be left in the deck (removing cards already played)
+   1. Button is red = complete decklist
+   2. Button is green (recommended) = played cards blacked out
+6. **ViewDeck button**
+   1. On click, will open the HSReplay page for the opponents deck in your default browser
+   2. On hover, will display the decklist of the deck in game
+7. **Cardlist** for the predicted deck
+   1. Cards are colour coded for easy viewing:
+      1. Red = Minion
+      2. Blue = Spell
+      3. Yellow = Weapon
+      4. Green = Location
+      5. Magenta = Secret
+      6. Star next to name = Legendary
+      7. Black = Already Played Card (if toggle button is green)
+   2. Hovering over a card in the decklist will display that cards details
+8. **Card Details**, only shown if you hover over a card in the decklist
+   1. Card Name
+   2. Card Cost
+   3. Card Type
+   4. Card Rarity
+   5. Card Text
+   6. Card Artist
+   7. Card Set
+   8. Card ID
 
 
 ## Installation instructions

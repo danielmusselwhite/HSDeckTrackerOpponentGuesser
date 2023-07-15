@@ -1,9 +1,12 @@
 ﻿using Hearthstone_Deck_Tracker.Utility.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OpenQA.Selenium;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,14 +34,14 @@ namespace HDT_OpponentGuesser
                     _matchups = new Dictionary<int, Dictionary<int, double>>() { };
 
                     #region Making API call to get info on all cards via api
-                    HttpResponseMessage response;
+                    HttpWebResponse response;
                     // if a new patch, then current_patch will fail so try first
                     try
                     {
                         response = GetMatchUpsResult(rankRange, true);
-                        if (response.Content == null)
+                        if(response==null)
                         {
-                            throw new Exception("response.Content was null");
+                            throw new Exception("response was null");
                         }
                     }
                     // if it fails, do same query but remove current_patch filter
@@ -52,8 +55,7 @@ namespace HDT_OpponentGuesser
 
 
                     // Converting to string content then to a parseable JSON object
-                    HttpContent content = response.Content;
-                    string stringContent = content.ReadAsStringAsync().Result;
+                    string stringContent = new System.IO.StreamReader(response.GetResponseStream()).ReadToEnd();
                     dynamic jsonContent = JsonConvert.DeserializeObject(stringContent);
                     var data = jsonContent.series.data;
 
@@ -96,18 +98,27 @@ namespace HDT_OpponentGuesser
         }
 
         // function for getting the httpResponseMessage for the API call parameterized
-        private static HttpResponseMessage GetMatchUpsResult(string rankRange, bool currentPatch)
+        private static HttpWebResponse GetMatchUpsResult(string rankRange, bool currentPatch)
         {
+            Log.Info("Making matchups request for rank: " + rankRange + " with currentPatch: " + currentPatch);
             string currentPatchString = currentPatch ? "&TimeRange=CURRENT_PATCH" : "";
 
-            string sessionCookie = HsrSessionCookieGetter.GetSessionCookie();
-            var cookieContainer = new System.Net.CookieContainer();
-            var handler = new System.Net.Http.HttpClientHandler() { CookieContainer = cookieContainer };
-            var httpClient = new HttpClient(handler);
-            if(sessionCookie != null) 
-                httpClient.DefaultRequestHeaders.Add("Cookie", "sessionid=" + sessionCookie);
-            HttpResponseMessage response = httpClient.GetAsync($"https://hsreplay.net/analytics/query/head_to_head_archetype_matchups_v2/?GameType=RANKED_STANDARD&LeagueRankRange={rankRange}{currentPatchString}").Result;
-            response.EnsureSuccessStatusCode();
+            string sessionCookie = HsrSessionCookieGetter._sessionId;
+
+            // Create the HTTP request
+            Log.Info("Requesting matchups for rank: " + rankRange + " with sessionCookie: " + sessionCookie);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create($"https://hsreplay.net/analytics/query/head_to_head_archetype_matchups_v2/?GameType=RANKED_STANDARD&LeagueRankRange={rankRange}{currentPatchString}");
+            request.Method = "GET";
+
+            // Add the session ID as a cookie
+            if (sessionCookie != null)
+            {
+                request.CookieContainer = new CookieContainer();
+                request.CookieContainer.Add(new System.Net.Cookie("sessionid", sessionCookie) { Domain = "hsreplay.net" });
+            }
+
+            // Send the request and get the response
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             return response;
         }
 

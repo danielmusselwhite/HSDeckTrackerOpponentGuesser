@@ -18,6 +18,9 @@ namespace HDT_OpponentGuesser
         {
             // Triggered upon startup and when the user ticks the plugin on
 
+            // get session cookie used to query hsreplay
+            HsrSessionCookieGetter.GetSessionCookie();
+
             // Create the GUI
             _bfdDisplay = new BestFitDeckDisplay();
             Core.OverlayCanvas.Children.Add(_bfdDisplay);
@@ -30,6 +33,8 @@ namespace HDT_OpponentGuesser
             GameEvents.OnOpponentPlay.Add(opponentGuesser.OpponentPlay);
             GameEvents.OnTurnStart.Add(opponentGuesser.TurnStart);
             GameEvents.OnInMenu.Add(opponentGuesser.InMenu);
+
+
 
         }
 
@@ -61,7 +66,7 @@ namespace HDT_OpponentGuesser
 
         public string Author => "Dmuss";
 
-        public Version Version => new Version(1, 0, 13);
+        public Version Version => new Version(1, 1, 0);
 
         public MenuItem MenuItem => null;
 
