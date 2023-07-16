@@ -44,7 +44,7 @@ namespace HDT_OpponentGuesser
 
         private Nullable<int> _playerArchetype; // the archetype of the player's deck (used in getting matchups)
 
-        private string _gameRank; // the rank of the current game
+        private string _rankString; // the rank of the player (used in tailoring stats)
 
         // Creating constructor that takes in a reference to the BestFitDeckDisplay class
         public OpponentGuesser(BestFitDeckDisplay displayBestFitDeck)
@@ -79,6 +79,48 @@ namespace HDT_OpponentGuesser
             _metaUserClassDecks = null;
             _bfdDisplay.Update(null); // update the display to show the default text
             _bfdDisplay.Show(); // show the display
+
+
+            #region Getting the rank of the player
+            // getting their rank in standard
+            int rankInt = _game.MatchInfo.LocalPlayer.StandardRank;
+            Log.Info("rankInt is " + rankInt);
+            _rankString = "GOLD"; // default to GOLD
+            switch (rankInt)
+            {
+                case 0:
+                    _rankString = "BRONZE";
+                    break;
+                case 1:
+                    _rankString = "SILVER";
+                    break;
+                case 2:
+                    _rankString = "GOLD";
+                    break;
+                case 3:
+                    _rankString = "PLATINUM";
+                    break;
+                case 4:
+                    _rankString = "DIAMOND";
+                    break;
+                case 5:
+                    _rankString = "LEGEND";
+                    break;
+            }
+            Log.Info("User is rank " + _rankString + " in standard.");
+            // if user isn't premium, user and user rank is Platinum, Diamond, or Legend; then use the rank GOLD instead
+            if (!HsrSessionCookieGetter.IsPremium() && (_rankString == "PLATINUM" || _rankString == "DIAMOND" || _rankString == "LEGEND"))
+            {
+                Log.Info("User is not premium, and is playing a " + _rankString + " game. Using GOLD rank instead as that is the max available for free.");
+                _rankString = "GOLD";
+            }
+
+            // call for matchupsdictionary singleton (called at start of game and only updates 1. if it doesn't exist (first game) or 2. if the rank range has changed since the last game.
+            _matchups = MatchUpsDictionary.GetMatchUpsDictionary(_rankString);
+
+            // updating the rank on the display
+            _bfdDisplay.SetRank(_rankString);
+            #endregion
         }
 
         // Triggered when a turn starts
@@ -92,8 +134,10 @@ namespace HDT_OpponentGuesser
                 if(_game.CurrentFormat.ToString() != "Standard")
                 {
                     Log.Info("This is a " + _game.CurrentFormat + " game, not running plugin for this game");
+                    _bfdDisplay.Hide();
                     return;
                 }
+                _bfdDisplay.Show();
 
 
                 Log.Info("This is the first turn!");
@@ -104,55 +148,13 @@ namespace HDT_OpponentGuesser
                 Log.Info("_oppClass = " + _oppClass);
                 Log.Info("_userClass = " + _game.Player.Class.ToUpper());
 
-
-
-                // getting their rank in standard
-                int rankInt = _game.MatchInfo.LocalPlayer.StandardRank;
-                Log.Info("rankInt is " + rankInt);
-                string rankString = "GOLD"; // default to GOLD
-                switch(rankInt)
-                {
-                    case 0:
-                        rankString = "BRONZE";
-                        break;
-                    case 1:
-                        rankString = "SILVER";
-                        break;
-                    case 2:
-                        rankString = "GOLD";
-                        break;
-                    case 3:
-                        rankString = "PLATINUM";
-                        break;
-                    case 4:
-                        rankString = "DIAMOND";
-                        break;
-                    case 5:
-                        rankString = "LEGEND";
-                        break;
-                }
-                Log.Info("User is rank " + rankString + " in standard.");
-                // if user isn't premium, user and user rank is Platinum, Diamond, or Legend; then use the rank GOLD instead
-                if (!HsrSessionCookieGetter.IsPremium() && (rankString == "PLATINUM" || rankString == "DIAMOND" || rankString == "LEGEND"))
-                {
-                    Log.Info("User is not premium, and is playing a " + rankString + " game. Using GOLD rank instead as that is the max available for free.");
-                    rankString = "GOLD";
-                }
-                _gameRank = rankString;
-
-                // call for matchupsdictionary singleton (called at start of game and only updates 1. if it doesn't exist (first game) or 2. if the rank range has changed since the last game.
-                _matchups = MatchUpsDictionary.GetMatchUpsDictionary(rankString);
-
-
-
                 // Get the Decks for this class only
-                _metaOppClassDecks = MetaDecks.GetClassMetaDecks(_oppClass, rankString);
-                _metaUserClassDecks = MetaDecks.GetClassMetaDecks(_game.Player.Class.ToUpper(), rankString);
+                _metaOppClassDecks = MetaDecks.GetClassMetaDecks(_oppClass, _rankString);
+                _metaUserClassDecks = MetaDecks.GetClassMetaDecks(_game.Player.Class.ToUpper(), _rankString);
 
                 // Get the players best fit deck so we can get matchups
                 _playerArchetype = GetPlayerBestFit();
                 Log.Info("user is playing playerArchetype: " + _playerArchetype);
-
 
                 _firstTurn = false;
             }
@@ -237,7 +239,7 @@ namespace HDT_OpponentGuesser
 
                 Log.Info("calling _bfdDisplay.Update()");
                 // Display the deck name in the overlay
-                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId, guessedDeckListCardInfo, deckPlayedCardsCardInfo, _gameRank, matchup);
+                _bfdDisplay.Update(bestDeckName, bestWinRate, bestFitDeckMatchPercent, bestFitDeckId, guessedDeckListCardInfo, deckPlayedCardsCardInfo, matchup);
             }
             else
             {
