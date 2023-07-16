@@ -6,7 +6,8 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
 
 [In Depth Text Explanation Here](./Documents/Manual.md)
 
-[Video Presentation Here](./Documents/Videos/Presentation.mp4)
+Click To See Video Presentation
+[![Watch the video](https://img.youtube.com/vi/E7a-nlvYjV0/maxresdefault.jpg)](https://www.youtube.com/watch?v=E7a-nlvYjV0)
 
 ## Installation instructions
 

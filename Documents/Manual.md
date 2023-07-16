@@ -2,7 +2,8 @@
 
 [Back To ReadMe](../README.md)
 
-[Video Presentation Here](./Videos/Presentation.mp4)
+Click To See Video Presentation
+[![Watch the video](https://img.youtube.com/vi/E7a-nlvYjV0/maxresdefault.jpg)](https://www.youtube.com/watch?v=E7a-nlvYjV0)
 
 ## On Launch
 - Upon loading the plugin a Chrome instance will be launched prompting you to login to hsreplay. 
