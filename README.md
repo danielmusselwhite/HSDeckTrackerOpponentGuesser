@@ -12,7 +12,9 @@ Click To See Video Presentation
 ## Installation instructions
 
 1. Download the HDT_OpponentGuesser.zip from the latest release
-2. Extract the HDT_OpponentGuesser.dll from the zip folder to %AppData%\HearthstoneDeckTracker\Plugins
+2. Extract the HDT_OpponentGuesser.zips contents to "*%AppData%\HearthstoneDeckTracker\Plugins*"
+   1. (Launch file explorer + copy this path into the address bar)
+   ![image](./Documents/Images/PluginsFolder.png)
 3. Restart HDT
 
 ## Suggestions

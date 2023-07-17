@@ -71,7 +71,17 @@ namespace HDT_OpponentGuesser
             this.Text = UpdateText();
             this.FontSize = 12;
             this.Foreground = Brushes.White;
-            this.Background = typeColorDict[type];
+            try
+            {
+                this.Background = typeColorDict[type];
+            }
+            // if the type is not in the dict, set the background to white
+            catch (KeyNotFoundException)
+            {
+                this.Background = Brushes.White;
+                this.Foreground = Brushes.Black;
+            }
+            
             this.FontWeight = FontWeights.Bold;
             this.Height = height;
             this.Width = 280;
