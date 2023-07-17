@@ -81,46 +81,15 @@ namespace HDT_OpponentGuesser
             _bfdDisplay.Show(); // show the display
 
 
-            #region Getting the rank of the player
-            // getting their rank in standard
-            int rankInt = _game.MatchInfo.LocalPlayer.StandardRank;
-            Log.Info("rankInt is " + rankInt);
-            _rankString = "GOLD"; // default to GOLD
-            switch (rankInt)
+            // Getting rank of player
+            try
             {
-                case 0:
-                    _rankString = "BRONZE";
-                    break;
-                case 1:
-                    _rankString = "SILVER";
-                    break;
-                case 2:
-                    _rankString = "GOLD";
-                    break;
-                case 3:
-                    _rankString = "PLATINUM";
-                    break;
-                case 4:
-                    _rankString = "DIAMOND";
-                    break;
-                case 5:
-                    _rankString = "LEGEND";
-                    break;
+                SetRankString();
             }
-            Log.Info("User is rank " + _rankString + " in standard.");
-            // if user isn't premium, user and user rank is Platinum, Diamond, or Legend; then use the rank GOLD instead
-            if (!HsrSessionCookieGetter.IsPremium() && (_rankString == "PLATINUM" || _rankString == "DIAMOND" || _rankString == "LEGEND"))
+            catch
             {
-                Log.Info("User is not premium, and is playing a " + _rankString + " game. Using GOLD rank instead as that is the max available for free.");
-                _rankString = "GOLD";
+                Log.Info("Couldn't get rank, as GameV2 is null on first Game for some reason (problem for HSDT itself, not this plugin), will instead be set on first turn"); 
             }
-
-            // call for matchupsdictionary singleton (called at start of game and only updates 1. if it doesn't exist (first game) or 2. if the rank range has changed since the last game.
-            _matchups = MatchUpsDictionary.GetMatchUpsDictionary(_rankString);
-
-            // updating the rank on the display
-            _bfdDisplay.SetRank(_rankString);
-            #endregion
         }
 
         // Triggered when a turn starts
@@ -131,7 +100,9 @@ namespace HDT_OpponentGuesser
             // setting up params on the first turn of the game once opponent has loaded in
             if (_firstTurn)
             {
-                if(_game.CurrentFormat.ToString() != "Standard")
+                SetRankString(); // in case it didn't get set on GameStart
+
+                if (_game.CurrentFormat.ToString() != "Standard")
                 {
                     Log.Info("This is a " + _game.CurrentFormat + " game, not running plugin for this game");
                     _bfdDisplay.Hide();
@@ -404,6 +375,49 @@ namespace HDT_OpponentGuesser
             }
 
             return deck;
+        }
+
+        private void SetRankString()
+        {
+            // getting their rank in standard
+            Log.Info("Getting the rank of the player");
+            int rankInt = Hearthstone_Deck_Tracker.Core.Game.MatchInfo.LocalPlayer.StandardRank;
+            Log.Info("rankInt is " + rankInt);
+            _rankString = "GOLD"; // default to GOLD
+            switch (rankInt)
+            {
+                case 1:
+                    _rankString = "BRONZE";
+                    break;
+                case 2:
+                    _rankString = "SILVER";
+                    break;
+                case 3:
+                    _rankString = "GOLD";
+                    break;
+                case 4:
+                    _rankString = "PLATINUM";
+                    break;
+                case 5:
+                    _rankString = "DIAMOND";
+                    break;
+                case 6:
+                    _rankString = "LEGEND";
+                    break;
+            }
+            Log.Info("User is rank " + _rankString + " in standard.");
+            // if user isn't premium, user and user rank is Platinum, Diamond, or Legend; then use the rank GOLD instead
+            if (!HsrSessionCookieGetter.IsPremium() && (_rankString == "PLATINUM" || _rankString == "DIAMOND" || _rankString == "LEGEND"))
+            {
+                Log.Info("User is not premium, and is playing a " + _rankString + " game. Using GOLD rank instead as that is the max available for free.");
+                _rankString = "GOLD";
+            }
+
+            // call for matchupsdictionary singleton (called at start of game and only updates 1. if it doesn't exist (first game) or 2. if the rank range has changed since the last game.
+            _matchups = MatchUpsDictionary.GetMatchUpsDictionary(_rankString);
+
+            // updating the rank on the display
+            _bfdDisplay.SetRank(_rankString);
         }
 
         // Triggered when the player enters menu

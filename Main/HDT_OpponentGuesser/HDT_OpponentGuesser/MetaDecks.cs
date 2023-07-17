@@ -45,6 +45,8 @@ namespace HDT_OpponentGuesser
                         response = GetAllMetaDecksResult(rankRange, false);
                     }
 
+                    Log.Info("Response = "+response.ToString());
+
                     // Get the string content
                     _allMetaDecks = new System.IO.StreamReader(response.GetResponseStream()).ReadToEnd();
                     _lastRank = rankRange;
