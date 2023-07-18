@@ -26,7 +26,15 @@ namespace HDT_OpponentGuesser
 
             // Create and configure the canvas
             canvasCardDetails.Name = "canvasCardDetails";
-            canvasCardDetails.Background = typeColorDict[cardTypeText];
+            try
+            {
+                canvasCardDetails.Background = typeColorDict[cardTypeText];
+            }
+            catch (KeyNotFoundException)
+            {
+                canvasCardDetails.Background = Brushes.White;
+            }
+            
             canvasCardDetails.Margin = new Thickness(479, 432, 125, 146);
 
             // Create and configure the text blocks

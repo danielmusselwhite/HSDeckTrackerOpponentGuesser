@@ -381,7 +381,13 @@ namespace HDT_OpponentGuesser
         {
             // getting their rank in standard
             Log.Info("Getting the rank of the player");
-            int rankInt = Hearthstone_Deck_Tracker.Core.Game.MatchInfo.LocalPlayer.StandardRank;
+
+            Log.Info("League ID: "+Hearthstone_Deck_Tracker.Core.Game.MatchInfo.LocalPlayer.Standard.LeagueId);
+
+            //int rankInt = Hearthstone_Deck_Tracker.Core.Game.MatchInfo.LocalPlayer.StandardRank;
+            int rankInt = 3;
+            if (Hearthstone_Deck_Tracker.Core.Game.MatchInfo.LocalPlayer.Standard.LeagueId!=null)
+                rankInt = (int) Hearthstone_Deck_Tracker.Core.Game.MatchInfo.LocalPlayer.Standard.LeagueId;
             Log.Info("rankInt is " + rankInt);
             _rankString = "GOLD"; // default to GOLD
             switch (rankInt)

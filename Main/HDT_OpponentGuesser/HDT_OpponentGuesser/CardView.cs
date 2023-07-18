@@ -91,16 +91,6 @@ namespace HDT_OpponentGuesser
             this.Margin = new Thickness(0, 0, 0, 0);
             this.Padding = new Thickness(0, 0, 0, 0);
 
-            // if card has not been played, make it bold; if not, make it normal
-            if (!played)
-            {
-                this.FontWeight = FontWeights.Bold;
-            }
-            else
-            {
-                this.FontWeight = FontWeights.Normal;
-            }
-
             // setting the Vertical position of the cards in order based on cardNumber
             this.SetValue(Canvas.BottomProperty, (double)cardNumber * (height + spaceBetween) + spaceBetween);
             this.SetValue(Canvas.LeftProperty, (double)(_parent.Width - this.Width) / 2);

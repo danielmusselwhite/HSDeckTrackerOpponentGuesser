@@ -2,12 +2,17 @@
 
 NOTE: currently this plugin only supports Standard_Ranked, and will not query for Wild, Twist, or other game modes decks.
 
-## Explanation of the plugin
+## Explanation
 
-[In Depth Text Explanation Here](./Documents/Manual.md)
+## Video Demonstration
 
 Click To See Video Presentation
 [![Watch the video](https://img.youtube.com/vi/E7a-nlvYjV0/maxresdefault.jpg)](https://www.youtube.com/watch?v=E7a-nlvYjV0)
+## How to use the plugin
+
+[In Depth Text Explanation Here](./Documents/Manual.md)
+
+
 
 ## Installation instructions
 
