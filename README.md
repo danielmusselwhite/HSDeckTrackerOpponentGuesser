@@ -2,7 +2,17 @@
 
 NOTE: currently this plugin only supports Standard_Ranked, and will not query for Wild, Twist, or other game modes decks.
 
+## Ethics and Motivation
+
+Hearthstone has a broad 'pen and paper' policy. This plugin does not violate this policy given it is simply automating something that can be done manually (e.g. launching hsreplay on my phone and filtering decks by class then looking at the most popular for a best fit).
+
 ## Explanation
+
+This project is a C# plugin for Hearthstone DeckTracker that integrates with HSReplay.net via API calls, allowing users to retrieve valuable information about the predicted opponents deck against the detected users deck archetypes.
+
+Selenium is used to grab a session cookie to allow for user's with premium accounts on HSReplay.net to access premium stats which recquire a valid session cookie in their API calls. 
+
+WPF is used in the GUI elements.
 
 ## Video Demonstration
 
