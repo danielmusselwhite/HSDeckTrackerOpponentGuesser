@@ -4,7 +4,7 @@ NOTE: currently this plugin only supports Standard_Ranked, and will not query fo
 
 ## Ethics and Motivation
 
-Hearthstone has a broad 'pen and paper' policy. This plugin does not violate this policy given it is simply automating something that can be done manually (e.g. launching hsreplay on my phone and filtering decks by class then looking at the most popular for a best fit).
+Hearthstone has a broad 'pen and paper' policy. This plugin does not violate this policy given it is simply automating something that can be done manually (e.g. launching hsreplay on a second monitor and filtering decks by class then looking at the most popular decks for a best fit).
 
 ## Explanation
 
