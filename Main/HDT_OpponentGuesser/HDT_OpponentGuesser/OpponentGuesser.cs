@@ -113,15 +113,15 @@ namespace HDT_OpponentGuesser
 
                 Log.Info("This is the first turn!");
                 _opponent = _game.Opponent;
-                _oppClass = _opponent.Class;
+                _oppClass = _opponent.OriginalClass;
                 _oppClass = _oppClass.ToUpper();
 
                 Log.Info("_oppClass = " + _oppClass);
-                Log.Info("_userClass = " + _game.Player.Class.ToUpper());
+                Log.Info("_userClass = " + _game.Player.OriginalClass.ToUpper());
 
                 // Get the Decks for this class only
                 _metaOppClassDecks = MetaDecks.GetClassMetaDecks(_oppClass, _rankString);
-                _metaUserClassDecks = MetaDecks.GetClassMetaDecks(_game.Player.Class.ToUpper(), _rankString);
+                _metaUserClassDecks = MetaDecks.GetClassMetaDecks(_game.Player.OriginalClass.ToUpper(), _rankString);
 
                 // Get the players best fit deck so we can get matchups
                 _playerArchetype = GetPlayerBestFit();
@@ -181,7 +181,12 @@ namespace HDT_OpponentGuesser
                 string bestDeckName = MetaDecks.GetDeckArchetypeName(archetypeId, _oppClass);
 
                 // getting the matchup winrate for this deck
-                double bestWinRate = GetMatchupWinrate((int)_playerArchetype, Int32.Parse(archetypeId));
+                double bestWinRate = -1; // if player doesn't have an archetype, then default there to be no matchup
+                // if player has an archetype, then get the matchup winrate
+                if (_playerArchetype != null) {
+                    bestWinRate = GetMatchupWinrate((int)_playerArchetype, Int32.Parse(archetypeId));
+                }
+                // if bestWinRate is -1, then this is the first matchup we have seen so far, so we don't want to display it as a matchup
                 bool matchup = true;
                 if (bestWinRate == -1)
                 {
